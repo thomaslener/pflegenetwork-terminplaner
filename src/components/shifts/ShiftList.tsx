@@ -88,29 +88,20 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
             key={shift.id}
             className={`rounded-lg p-4 transition-all relative ${cardClasses}`}
           >
-            {(isOpenShift || isReplacementRequest || isOwnSeekingReplacement) && (
+            {(isOpenShift || isReplacementRequest) && shift.region_name && (
               <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
-                {isOpenShift && (
-                  <span className="inline-flex items-center gap-1 bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                    Offener Termin
-                  </span>
-                )}
-                {!isOpenShift && isReplacementRequest && (
-                  <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                    Vertretung gesucht
-                  </span>
-                )}
-                {isOwnSeekingReplacement && (
-                  <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                    Vertretung wird gesucht
-                  </span>
-                )}
-                {shift.region_name && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-700 text-white">
-                    <MapPin className="w-3 h-3" />
-                    {shift.region_name}
-                  </span>
-                )}
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-700 text-white">
+                  <MapPin className="w-3 h-3" />
+                  {shift.region_name}
+                </span>
+              </div>
+            )}
+
+            {isOwnSeekingReplacement && (
+              <div className="absolute bottom-3 right-3">
+                <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                  Vertretung wird gesucht
+                </span>
               </div>
             )}
 
