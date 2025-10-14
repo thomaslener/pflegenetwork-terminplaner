@@ -116,8 +116,12 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                     </span>
                   )}
                   {shift.region_name && (
-                    <span className="inline-flex items-center gap-1.5 bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full text-xs font-medium">
-                      <MapPin className="w-3 h-3" />
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                      isOpenShift || isReplacementRequest || isOwnSeekingReplacement
+                        ? 'bg-slate-700 text-white'
+                        : 'bg-slate-700 text-white'
+                    }`}>
+                      <MapPin className="w-3.5 h-3.5" />
                       {shift.region_name}
                     </span>
                   )}
