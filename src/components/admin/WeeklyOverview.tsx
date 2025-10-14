@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { ChevronLeft, ChevronRight, Calendar, X, Pencil, Trash2, AlertTriangle, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, X, Pencil, Trash2, AlertTriangle, Plus, FileText } from 'lucide-react';
 import type { Database } from '../../lib/database.types';
 import { ClientAutocomplete } from '../shared/ClientAutocomplete';
 
@@ -739,6 +739,16 @@ export function WeeklyOverview() {
                                         Vertretung gesucht
                                       </div>
                                     )}
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                      }}
+                                      className="flex items-center gap-1 mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium py-1 px-2 rounded transition-colors"
+                                      title="Buchung"
+                                    >
+                                      <FileText className="w-3 h-3" />
+                                      Buchung
+                                    </button>
                                   </div>
                                 ))}
                                 <div className="flex items-center justify-center pt-1">

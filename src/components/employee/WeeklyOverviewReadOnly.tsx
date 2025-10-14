@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { ChevronLeft, ChevronRight, Calendar, X, Pencil, Trash2, AlertTriangle, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, X, Pencil, Trash2, AlertTriangle, Plus, FileText } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Database } from '../../lib/database.types';
 import { ClientAutocomplete } from '../shared/ClientAutocomplete';
@@ -792,6 +792,16 @@ export function WeeklyOverviewReadOnly() {
                                         <div className="text-xs mt-1 font-semibold text-primary-700 bg-primary-50 px-2 py-1 rounded">
                                           In Vertretung für {originalEmployeeName}
                                         </div>
+                                      )}
+                                      {isOwn && (
+                                        <button
+                                          onClick={() => {}}
+                                          className="flex items-center gap-1 mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium py-1 px-2 rounded transition-colors"
+                                          title="Buchung"
+                                        >
+                                          <FileText className="w-3 h-3" />
+                                          Buchung
+                                        </button>
                                       )}
                                     </div>
                                     {canTakeOver && (

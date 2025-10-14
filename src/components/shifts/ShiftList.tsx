@@ -1,4 +1,4 @@
-import { Pencil, Trash2, Clock, User, Users } from 'lucide-react';
+import { Pencil, Trash2, Clock, User, Users, FileText } from 'lucide-react';
 import type { Database } from '../../lib/database.types';
 
 type Shift = Database['public']['Tables']['shifts']['Row'] & {
@@ -179,6 +179,17 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                     className={takeoverButtonClasses}
                   >
                     {takeoverLabel}
+                  </button>
+                )}
+
+                {isOwnShift && (
+                  <button
+                    onClick={() => {}}
+                    className="mt-3 flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium py-1.5 px-3 rounded-lg transition-colors"
+                    title="Buchung"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    Buchung
                   </button>
                 )}
               </div>
