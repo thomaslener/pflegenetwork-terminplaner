@@ -88,39 +88,46 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
             key={shift.id}
             className={`rounded-lg p-4 transition-all relative ${cardClasses}`}
           >
+            {(isOpenShift || isReplacementRequest || isOwnSeekingReplacement) && (
+              <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+                {isOpenShift && (
+                  <span className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    Offener Termin
+                  </span>
+                )}
+                {!isOpenShift && isReplacementRequest && (
+                  <span className="inline-flex items-center gap-1.5 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    Vertretung gesucht
+                  </span>
+                )}
+                {isOwnSeekingReplacement && (
+                  <span className="inline-flex items-center gap-1.5 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    Vertretung wird gesucht
+                  </span>
+                )}
+                {shift.region_name && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-700 text-white">
+                    <MapPin className="w-3.5 h-3.5" />
+                    {shift.region_name}
+                  </span>
+                )}
+              </div>
+            )}
+
             <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 pr-32">
                 <div className="text-lg text-gray-900 mb-2">
                   {shift.client_name}
                 </div>
 
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  {isOpenShift && (
-                    <span className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      Offener Termin
-                    </span>
-                  )}
-                  {!isOpenShift && isReplacementRequest && (
-                    <span className="inline-flex items-center gap-1.5 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      Vertretung gesucht
-                    </span>
-                  )}
-                  {!isReplacementRequest && isReplacementShift(shift) && (
+                  {!isOpenShift && !isReplacementRequest && !isOwnSeekingReplacement && !isReplacementRequest && isReplacementShift(shift) && (
                     <span className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
                       Vertretung für {shift.original_employee_name}
                     </span>
                   )}
-                  {isOwnSeekingReplacement && (
-                    <span className="inline-flex items-center gap-1.5 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      Vertretung wird gesucht
-                    </span>
-                  )}
-                  {shift.region_name && (
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
-                      isOpenShift || isReplacementRequest || isOwnSeekingReplacement
-                        ? 'bg-slate-700 text-white'
-                        : 'bg-slate-700 text-white'
-                    }`}>
+                  {!isOpenShift && !isReplacementRequest && !isOwnSeekingReplacement && shift.region_name && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-700 text-white">
                       <MapPin className="w-3.5 h-3.5" />
                       {shift.region_name}
                     </span>
