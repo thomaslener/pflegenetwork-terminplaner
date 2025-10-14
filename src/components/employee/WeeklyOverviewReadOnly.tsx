@@ -134,10 +134,20 @@ export function WeeklyOverviewReadOnly() {
 
       // Filter regions and employees to only show those in the user's federal state
       if (currentUserFederalStateId) {
+        console.log('=== FILTERING START ===');
+        console.log('Current user federal state ID:', currentUserFederalStateId);
+        console.log('All regions before filter:', regions.map(r => ({ name: r.name, id: r.id, federal_state_id: r.federal_state_id })));
+
         regions = regions.filter(r => r.federal_state_id === currentUserFederalStateId);
+        console.log('Filtered regions:', regions.map(r => ({ name: r.name, id: r.id })));
+
         const regionIds = new Set(regions.map(r => r.id));
+        console.log('Region IDs set:', Array.from(regionIds));
+
+        console.log('All employees before filter:', employees.map(e => ({ email: e.email, full_name: e.full_name, region_id: e.region_id })));
         employees = employees.filter(e => e.region_id && regionIds.has(e.region_id));
-        console.log('Filtered employees:', employees.map(e => ({ email: e.email, region: e.region_id })));
+        console.log('Filtered employees:', employees.map(e => ({ email: e.email, full_name: e.full_name, region: e.region_id })));
+        console.log('=== FILTERING END ===');
       }
 
       // Sort regions by federal state order, then by region order
