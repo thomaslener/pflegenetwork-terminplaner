@@ -18,7 +18,7 @@ interface ShiftListProps {
 export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId, emptyMessage }: ShiftListProps) {
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('de-DE', {
-      weekday: 'short',
+      weekday: 'long',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
