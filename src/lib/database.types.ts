@@ -73,6 +73,9 @@ export interface Database {
           created_by: string | null
           created_at: string
           updated_at: string
+          seeking_replacement: boolean
+          original_employee_id: string | null
+          open_shift: boolean
         }
         Insert: {
           id?: string
@@ -85,6 +88,9 @@ export interface Database {
           created_by?: string | null
           created_at?: string
           updated_at?: string
+          seeking_replacement?: boolean
+          original_employee_id?: string | null
+          open_shift?: boolean
         }
         Update: {
           id?: string
@@ -97,6 +103,9 @@ export interface Database {
           created_by?: string | null
           created_at?: string
           updated_at?: string
+          seeking_replacement?: boolean
+          original_employee_id?: string | null
+          open_shift?: boolean
         }
       }
       weekly_templates: {
