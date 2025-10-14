@@ -802,7 +802,7 @@ export function WeeklyOverviewReadOnly() {
                                         onClick={() => handleTakeOver(shift.id)}
                                         className="w-full mt-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 px-2 rounded transition-colors"
                                       >
-                                        Vertretung übernehmen?
+                                        Vertretung annehmen
                                       </button>
                                     )}
                                   </div>
@@ -872,7 +872,7 @@ export function WeeklyOverviewReadOnly() {
                                       }}
                                       className="w-full mt-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-1.5 px-2 rounded transition-colors"
                                     >
-                                      Termin übernehmen
+                                      Termin annehmen
                                     </button>
                                   </div>
                                 ))}
