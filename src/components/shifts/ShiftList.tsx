@@ -123,14 +123,6 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                   </div>
                 </div>
 
-                {(isOpenShift || isReplacementRequest) && shift.employee_name && (
-                  <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-2">
-                    <Users className="w-3.5 h-3.5" />
-                    <span>
-                      {isOpenShift ? `Erstellt von ${shift.employee_name}` : `${shift.employee_name} sucht Vertretung`}
-                    </span>
-                  </div>
-                )}
 
                 {shift.notes && (
                   <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
@@ -175,8 +167,19 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
               </div>
             )}
 
+            {(isOpenShift || isReplacementRequest) && shift.employee_name && (
+              <div className="absolute bottom-3 left-3">
+                <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <Users className="w-3.5 h-3.5" />
+                  <span>
+                    {isOpenShift ? `Erstellt von ${shift.employee_name}` : `${shift.employee_name} sucht Vertretung`}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {isOwnShift && !isReplacementRequest && (
-              <div className="absolute bottom-3 right-3">
+              <div className="flex justify-end mt-3">
                 <button
                   className="inline-flex items-center gap-1.5 bg-gray-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors shadow-sm"
                   title="Buchung"
