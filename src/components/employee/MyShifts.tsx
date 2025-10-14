@@ -124,23 +124,25 @@ export function MyShifts() {
               ...(openShiftsData?.map(s => s.employee_id).filter((id): id is string => !!id) || [])
             ])];
 
-            let profiles: { id: string; full_name: string | null }[] | null = [];
+            let profiles: { id: string; full_name: string | null; region_id: string | null }[] | null = [];
 
             if (employeeIds.length > 0) {
               const { data: profileData } = await supabase
                 .from('profiles')
-                .select('id, full_name')
+                .select('id, full_name, region_id')
                 .in('id', employeeIds);
 
               profiles = profileData;
             }
 
             const profileMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
+            const employeeRegionMap = new Map(profiles?.map(p => [p.id, p.region_id]) || []);
 
-            // Load region names
+            // Load region names - include regions from employees and shifts
             const uniqueRegionIds = [...new Set([
               ...(replacementShiftsData?.map(s => s.region_id).filter((id): id is string => !!id) || []),
-              ...(openShiftsData?.map(s => s.region_id).filter((id): id is string => !!id) || [])
+              ...(openShiftsData?.map(s => s.region_id).filter((id): id is string => !!id) || []),
+              ...(profiles?.map(p => p.region_id).filter((id): id is string | null => !!id) || [])
             ])];
 
             let regions: { id: string; name: string }[] | null = [];
@@ -156,11 +158,15 @@ export function MyShifts() {
 
             const regionMap = new Map(regions?.map(r => [r.id, r.name]) || []);
 
-            replacementShiftsWithNames = replacementShiftsData?.map(shift => ({
-              ...shift,
-              employee_name: profileMap.get(shift.employee_id) || 'Unbekannt',
-              region_name: shift.region_id ? regionMap.get(shift.region_id) : undefined
-            })) || [];
+            replacementShiftsWithNames = replacementShiftsData?.map(shift => {
+              const employeeRegionId = shift.employee_id ? employeeRegionMap.get(shift.employee_id) : null;
+              const regionId = shift.region_id || employeeRegionId;
+              return {
+                ...shift,
+                employee_name: profileMap.get(shift.employee_id) || 'Unbekannt',
+                region_name: regionId ? regionMap.get(regionId) : undefined
+              };
+            }) || [];
 
             openShiftsWithNames = openShiftsData?.map(shift => ({
               ...shift,
