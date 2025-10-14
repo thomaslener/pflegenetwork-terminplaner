@@ -152,6 +152,25 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
         </div>
 
         <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Region *
+          </label>
+          <select
+            value={formData.region_id}
+            onChange={(e) => setFormData({ ...formData, region_id: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            required
+          >
+            <option value="">Region auswählen...</option>
+            {regions.map(region => (
+              <option key={region.id} value={region.id}>
+                {region.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="md:col-span-2">
           <label className="flex items-start gap-3 text-sm font-medium text-gray-700">
             <input
               type="checkbox"
@@ -167,27 +186,6 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
             </span>
           </label>
         </div>
-
-        {formData.open_shift && (
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Region *
-            </label>
-            <select
-              value={formData.region_id}
-              onChange={(e) => setFormData({ ...formData, region_id: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              required={formData.open_shift}
-            >
-              <option value="">Region auswählen...</option>
-              {regions.map(region => (
-                <option key={region.id} value={region.id}>
-                  {region.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
       </div>
 
       <div className="flex gap-2 mt-4">
