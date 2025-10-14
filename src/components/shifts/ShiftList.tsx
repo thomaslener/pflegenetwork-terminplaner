@@ -33,6 +33,33 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
     return shift.original_employee_id && shift.original_employee_name;
   };
 
+  const getStartOfNextWeek = () => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+    const nextMonday = new Date(now);
+    nextMonday.setDate(now.getDate() + daysUntilMonday);
+    nextMonday.setHours(0, 0, 0, 0);
+    return nextMonday;
+  };
+
+  const groupShiftsByWeek = (shifts: Shift[]) => {
+    const nextWeekStart = getStartOfNextWeek();
+    const thisWeek: Shift[] = [];
+    const nextWeek: Shift[] = [];
+
+    shifts.forEach(shift => {
+      const shiftDate = new Date(`${shift.shift_date}T00:00:00`);
+      if (shiftDate >= nextWeekStart) {
+        nextWeek.push(shift);
+      } else {
+        thisWeek.push(shift);
+      }
+    });
+
+    return { thisWeek, nextWeek };
+  };
+
   if (shifts.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500 bg-white border border-slate-200 rounded-lg">
@@ -41,9 +68,9 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
     );
   }
 
-  return (
-    <div className="space-y-3">
-      {shifts.map((shift) => {
+  const { thisWeek, nextWeek } = groupShiftsByWeek(shifts);
+
+  const renderShift = (shift: Shift) => {
         const isOwnShift = currentUserId && shift.employee_id === currentUserId;
         const isOpenShift = shift.open_shift;
         const isReplacementRequest = !isOpenShift && shift.seeking_replacement && onTakeOver && !isOwnShift;
@@ -177,7 +204,24 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
             </div>
           </div>
         );
-      })}
+  };
+
+  return (
+    <div className="space-y-6">
+      {thisWeek.length > 0 && (
+        <div className="space-y-3">
+          {thisWeek.map((shift) => renderShift(shift))}
+        </div>
+      )}
+
+      {nextWeek.length > 0 && (
+        <div className="space-y-3">
+          <div className="pt-4 border-t border-gray-300">
+            <h4 className="text-lg font-semibold text-gray-900 mb-3">Ab nächster Woche</h4>
+          </div>
+          {nextWeek.map((shift) => renderShift(shift))}
+        </div>
+      )}
     </div>
   );
 }

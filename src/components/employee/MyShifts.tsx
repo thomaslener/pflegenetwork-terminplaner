@@ -156,9 +156,27 @@ export function MyShifts() {
           return a.time_from.localeCompare(b.time_from);
         });
 
-      setOwnShifts(sortByDateAndTime(ownShiftsWithNames));
-      setReplacementShifts(sortByDateAndTime(replacementShiftsWithNames));
-      setOpenShifts(sortByDateAndTime(openShiftsWithNames));
+      const now = new Date();
+      const cutoffTimeOwnShifts = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+      const filteredOwnShifts = ownShiftsWithNames.filter(shift => {
+        const shiftDateTime = new Date(`${shift.shift_date}T${shift.time_to}`);
+        return shiftDateTime >= cutoffTimeOwnShifts;
+      });
+
+      const filteredReplacementShifts = replacementShiftsWithNames.filter(shift => {
+        const shiftDate = new Date(`${shift.shift_date}T${shift.time_from}`);
+        return shiftDate >= now;
+      });
+
+      const filteredOpenShifts = openShiftsWithNames.filter(shift => {
+        const shiftDate = new Date(`${shift.shift_date}T${shift.time_from}`);
+        return shiftDate >= now;
+      });
+
+      setOwnShifts(sortByDateAndTime(filteredOwnShifts));
+      setReplacementShifts(sortByDateAndTime(filteredReplacementShifts));
+      setOpenShifts(sortByDateAndTime(filteredOpenShifts));
     } catch (error) {
       console.error('Error loading shifts:', error);
     } finally {
