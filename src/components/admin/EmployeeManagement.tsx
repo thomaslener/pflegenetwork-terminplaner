@@ -36,6 +36,7 @@ export function EmployeeManagement() {
     full_name: '',
     role: 'employee' as 'admin' | 'employee',
     region_id: '',
+    new_password: '',
   });
 
   useEffect(() => {
@@ -79,6 +80,31 @@ export function EmployeeManagement() {
           .eq('id', editingEmployee.id);
 
         if (error) throw error;
+
+        // Update password if provided
+        if (formData.new_password) {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) throw new Error('Not authenticated');
+
+          const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-user-password`;
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: editingEmployee.id,
+              new_password: formData.new_password,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (!result.success) {
+            throw new Error(result.error || 'Fehler beim Aktualisieren des Passworts');
+          }
+        }
       } else {
         // Calculate sort order
         const regionEmployees = employees.filter(e => e.region_id === formData.region_id);
@@ -115,7 +141,7 @@ export function EmployeeManagement() {
         alert(`Person erstellt!\n\nE-Mail: ${formData.email}\nTemporäres Passwort: ${result.temporaryPassword}\n\nBitte notieren Sie das Passwort und geben Sie es der Person weiter.`);
       }
 
-      setFormData({ email: '', full_name: '', role: 'employee', region_id: '' });
+      setFormData({ email: '', full_name: '', role: 'employee', region_id: '', new_password: '' });
       setShowForm(false);
       setEditingEmployee(null);
       loadData();
@@ -325,6 +351,23 @@ export function EmployeeManagement() {
                 })}
               </select>
             </div>
+            {editingEmployee && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Neues Passwort
+                </label>
+                <input
+                  type="password"
+                  value={formData.new_password}
+                  onChange={(e) => setFormData({ ...formData, new_password: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Leer lassen, um nicht zu ändern"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Optional: Geben Sie ein neues Passwort ein, um das bestehende zu ändern
+                </p>
+              </div>
+            )}
             <div className="flex gap-2">
               <button
                 type="submit"
