@@ -796,10 +796,10 @@ export function WeeklyOverviewReadOnly() {
                                       {isOwn && (
                                         <button
                                           onClick={() => {}}
-                                          className="flex items-center gap-1 mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium py-1 px-2 rounded transition-colors"
+                                          className="flex items-center gap-1 mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[10px] font-semibold py-0.5 px-1.5 rounded transition-colors uppercase"
                                           title="Buchung"
                                         >
-                                          <FileText className="w-3 h-3" />
+                                          <FileText className="w-2.5 h-2.5" />
                                           Buchung
                                         </button>
                                       )}

@@ -185,10 +185,10 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                 {isOwnShift && (
                   <button
                     onClick={() => {}}
-                    className="mt-3 flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium py-1.5 px-3 rounded-lg transition-colors"
+                    className="mt-3 flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[10px] font-semibold py-1 px-2 rounded transition-colors uppercase"
                     title="Buchung"
                   >
-                    <FileText className="w-3.5 h-3.5" />
+                    <FileText className="w-3 h-3" />
                     Buchung
                   </button>
                 )}
