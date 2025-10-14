@@ -80,40 +80,39 @@ export function EmployeeManagement() {
 
         if (error) throw error;
       } else {
-        const temporaryPassword = Math.random().toString(36).slice(-12) + 'A1!';
+        // Calculate sort order
+        const regionEmployees = employees.filter(e => e.region_id === formData.region_id);
+        const maxSortOrder = regionEmployees.length > 0
+          ? Math.max(...regionEmployees.map(e => e.sort_order || 0))
+          : 0;
 
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: formData.email,
-          password: temporaryPassword,
-          options: {
-            data: {
-              full_name: formData.full_name,
-            }
-          }
+        // Call edge function to create user
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error('Not authenticated');
+
+        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`;
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            full_name: formData.full_name,
+            role: formData.role,
+            region_id: formData.region_id || null,
+            sort_order: maxSortOrder + 1,
+          }),
         });
 
-        if (authError) throw authError;
+        const result = await response.json();
 
-        if (authData.user) {
-          const regionEmployees = employees.filter(e => e.region_id === formData.region_id);
-          const maxSortOrder = regionEmployees.length > 0
-            ? Math.max(...regionEmployees.map(e => e.sort_order || 0))
-            : 0;
-
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update({
-              full_name: formData.full_name,
-              role: formData.role,
-              region_id: formData.region_id || null,
-              sort_order: maxSortOrder + 1,
-            })
-            .eq('id', authData.user.id);
-
-          if (profileError) throw profileError;
-
-          alert(`Person erstellt!\n\nE-Mail: ${formData.email}\nTemporäres Passwort: ${temporaryPassword}\n\nBitte notieren Sie das Passwort und geben Sie es der Person weiter.`);
+        if (!result.success) {
+          throw new Error(result.error || 'Fehler beim Erstellen der Person');
         }
+
+        alert(`Person erstellt!\n\nE-Mail: ${formData.email}\nTemporäres Passwort: ${result.temporaryPassword}\n\nBitte notieren Sie das Passwort und geben Sie es der Person weiter.`);
       }
 
       setFormData({ email: '', full_name: '', role: 'employee', region_id: '' });
