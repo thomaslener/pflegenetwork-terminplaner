@@ -100,7 +100,7 @@ export function WeeklyOverviewReadOnly() {
           .from('regions')
           .select('federal_state_id')
           .eq('id', profile.region_id)
-          .single();
+          .maybeSingle();
         currentUserFederalStateId = userRegion?.federal_state_id || null;
         setUserFederalStateId(currentUserFederalStateId);
         console.log('User federal state ID:', currentUserFederalStateId);
