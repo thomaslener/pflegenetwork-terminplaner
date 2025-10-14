@@ -21,7 +21,7 @@ export function EmployeeDashboard() {
               <img src="/pni2.svg" alt="pflege network" className="w-10 h-10" />
               <div>
                 <h1 className="text-xl font-bold text-gray-900">pflege network Terminplaner</h1>
-                <p className="text-xs text-gray-500">Meine Termine</p>
+                <p className="text-xs text-gray-500">Dashboard</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -54,18 +54,7 @@ export function EmployeeDashboard() {
                 }`}
               >
                 <Calendar className="w-5 h-5" />
-                Meine Termine
-              </button>
-              <button
-                onClick={() => setActiveTab('templates')}
-                className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors border-b-2 ${
-                  activeTab === 'templates'
-                    ? 'border-primary-600 text-primary-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-slate-50'
-                }`}
-              >
-                <Clock className="w-5 h-5" />
-                Wochen-Vorlagen
+                Dashboard
               </button>
               <button
                 onClick={() => setActiveTab('overview')}
@@ -77,6 +66,17 @@ export function EmployeeDashboard() {
               >
                 <Users className="w-5 h-5" />
                 Wochenübersicht
+              </button>
+              <button
+                onClick={() => setActiveTab('templates')}
+                className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors border-b-2 ${
+                  activeTab === 'templates'
+                    ? 'border-primary-600 text-primary-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-slate-50'
+                }`}
+              >
+                <Clock className="w-5 h-5" />
+                Wochen-Vorlagen
               </button>
               <button
                 onClick={() => setActiveTab('absences')}

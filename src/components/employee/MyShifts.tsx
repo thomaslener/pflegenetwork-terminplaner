@@ -291,7 +291,7 @@ export function MyShifts() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Meine Termine</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
         <div className="flex items-center gap-2">
           <button
             onClick={previousMonth}
