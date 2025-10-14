@@ -100,7 +100,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
             )}
 
             {isOwnSeekingReplacement && (
-              <div className="absolute bottom-3 right-3">
+              <div className="absolute bottom-6 right-3">
                 <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
                   Vertretung wird gesucht
                 </span>
