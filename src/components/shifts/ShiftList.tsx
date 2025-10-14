@@ -80,7 +80,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
         const cardClasses = isOpenShift
           ? 'bg-blue-50 border-2 border-blue-300 border-dashed hover:shadow-lg'
           : isReplacementRequest
-          ? 'bg-yellow-50 border-2 border-yellow-300 border-dashed hover:shadow-lg'
+          ? 'bg-orange-50 border-2 border-orange-300 border-dashed hover:shadow-lg'
           : 'bg-green-50 border-2 border-green-300 hover:shadow-lg';
 
         return (
@@ -101,7 +101,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                     </span>
                   )}
                   {!isOpenShift && isReplacementRequest && (
-                    <span className="inline-flex items-center gap-1.5 bg-yellow-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    <span className="inline-flex items-center gap-1.5 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
                       Vertretung gesucht
                     </span>
                   )}
@@ -111,7 +111,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                     </span>
                   )}
                   {isOwnSeekingReplacement && (
-                    <span className="inline-flex items-center gap-1.5 bg-yellow-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    <span className="inline-flex items-center gap-1.5 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
                       Vertretung wird gesucht
                     </span>
                   )}
