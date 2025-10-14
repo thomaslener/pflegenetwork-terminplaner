@@ -108,7 +108,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
             )}
 
             <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0 pr-32">
+              <div className="flex-1 min-w-0">
                 <div className="text-lg text-gray-900 mb-2">
                   {shift.client_name}
                 </div>
@@ -121,9 +121,10 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <div className="flex items-center text-sm text-gray-600 mb-2">
                   <span className="font-medium">{formatTime(shift.time_from)} - {formatTime(shift.time_to)}</span>
-                  <div className="text-right">
+                  <div className="flex-1"></div>
+                  <div className="text-right whitespace-nowrap">
                     <span className="font-medium">{formatDate(shift.shift_date).weekday}, {formatDate(shift.shift_date).dateStr}</span>
                   </div>
                 </div>
