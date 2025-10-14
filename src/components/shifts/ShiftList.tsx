@@ -1,4 +1,4 @@
-import { Pencil, Trash2, Clock, User, Users, FileText, MapPin, Check } from 'lucide-react';
+import { Pencil, Trash2, Clock, User, Users, FileText, MapPin, Check, BookOpen } from 'lucide-react';
 import type { Database } from '../../lib/database.types';
 
 type Shift = Database['public']['Tables']['shifts']['Row'] & {
@@ -171,6 +171,18 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                 >
                   <Check className="w-3.5 h-3.5" />
                   Annehmen
+                </button>
+              </div>
+            )}
+
+            {isOwnShift && !isReplacementRequest && (
+              <div className="absolute bottom-3 right-3">
+                <button
+                  className="inline-flex items-center gap-1.5 bg-gray-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors shadow-sm"
+                  title="Buchung"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Buchung
                 </button>
               </div>
             )}
