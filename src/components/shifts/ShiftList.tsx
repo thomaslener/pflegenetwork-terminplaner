@@ -89,25 +89,25 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
             className={`rounded-lg p-4 transition-all relative ${cardClasses}`}
           >
             {(isOpenShift || isReplacementRequest || isOwnSeekingReplacement) && (
-              <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+              <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
                 {isOpenShift && (
-                  <span className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1 bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
                     Offener Termin
                   </span>
                 )}
                 {!isOpenShift && isReplacementRequest && (
-                  <span className="inline-flex items-center gap-1.5 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
                     Vertretung gesucht
                   </span>
                 )}
                 {isOwnSeekingReplacement && (
-                  <span className="inline-flex items-center gap-1.5 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
                     Vertretung wird gesucht
                   </span>
                 )}
                 {shift.region_name && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-700 text-white">
-                    <MapPin className="w-3.5 h-3.5" />
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-700 text-white">
+                    <MapPin className="w-3 h-3" />
                     {shift.region_name}
                   </span>
                 )}
@@ -122,14 +122,8 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
 
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   {!isOpenShift && !isReplacementRequest && !isOwnSeekingReplacement && !isReplacementRequest && isReplacementShift(shift) && (
-                    <span className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    <span className="inline-flex items-center gap-1 bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
                       Vertretung für {shift.original_employee_name}
-                    </span>
-                  )}
-                  {!isOpenShift && !isReplacementRequest && !isOwnSeekingReplacement && shift.region_name && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-700 text-white">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {shift.region_name}
                     </span>
                   )}
                 </div>
