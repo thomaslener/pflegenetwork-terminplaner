@@ -122,10 +122,10 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                 </div>
 
                 <div className="flex items-center text-sm text-gray-600 mb-2">
-                  <span className="font-medium">{formatTime(shift.time_from)} - {formatTime(shift.time_to)}</span>
+                  <span className="font-medium">{formatDate(shift.shift_date).weekday}, {formatDate(shift.shift_date).dateStr}</span>
                   <div className="flex-1"></div>
                   <div className="text-right whitespace-nowrap">
-                    <span className="font-medium">{formatDate(shift.shift_date).weekday}, {formatDate(shift.shift_date).dateStr}</span>
+                    <span className="font-medium">{formatTime(shift.time_from)} - {formatTime(shift.time_to)}</span>
                   </div>
                 </div>
 
