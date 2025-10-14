@@ -109,25 +109,28 @@ export function AdminShiftManagement() {
 
   const handleSaveShift = async (shiftData: any) => {
     try {
-      let query = supabase
-        .from('shifts')
-        .select('*')
-        .eq('employee_id', selectedEmployee)
-        .eq('shift_date', shiftData.shift_date);
+      // If it's an open shift, skip overlap check
+      if (!shiftData.open_shift) {
+        let query = supabase
+          .from('shifts')
+          .select('*')
+          .eq('employee_id', selectedEmployee)
+          .eq('shift_date', shiftData.shift_date);
 
-      if (editingShift?.id) {
-        query = query.neq('id', editingShift.id);
-      }
+        if (editingShift?.id) {
+          query = query.neq('id', editingShift.id);
+        }
 
-      const { data: existingShifts, error: queryError } = await query;
+        const { data: existingShifts, error: queryError } = await query;
 
-      if (queryError) throw queryError;
+        if (queryError) throw queryError;
 
-      if (existingShifts && existingShifts.length > 0) {
-        for (const existing of existingShifts) {
-          if (checkTimeOverlap(shiftData.time_from, shiftData.time_to, existing.time_from, existing.time_to)) {
-            setErrorMessage('Der Termin überschneidet sich mit einem bestehenden Termin der Person an diesem Tag.');
-            throw new Error('Zeitüberschneidung');
+        if (existingShifts && existingShifts.length > 0) {
+          for (const existing of existingShifts) {
+            if (checkTimeOverlap(shiftData.time_from, shiftData.time_to, existing.time_from, existing.time_to)) {
+              setErrorMessage('Der Termin überschneidet sich mit einem bestehenden Termin der Person an diesem Tag.');
+              throw new Error('Zeitüberschneidung');
+            }
           }
         }
       }
@@ -140,9 +143,13 @@ export function AdminShiftManagement() {
 
         if (error) throw error;
       } else {
+        const insertData = shiftData.open_shift
+          ? { ...shiftData, employee_id: null }
+          : { ...shiftData, employee_id: selectedEmployee };
+
         const { error } = await supabase
           .from('shifts')
-          .insert([{ ...shiftData, employee_id: selectedEmployee }]);
+          .insert([insertData]);
 
         if (error) throw error;
       }

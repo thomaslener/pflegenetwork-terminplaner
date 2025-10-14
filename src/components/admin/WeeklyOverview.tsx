@@ -38,6 +38,7 @@ interface EmployeeShifts {
 interface RegionGroup {
   region: RegionExtended | null;
   employeeShifts: EmployeeShifts[];
+  openShifts: Shift[];
 }
 
 interface FederalStateGroup {
@@ -153,12 +154,25 @@ export function WeeklyOverview() {
       const { data: allShifts, error: shiftsError } = await supabase
         .from('shifts')
         .select('*')
+        .not('employee_id', 'is', null)
         .gte('shift_date', startDateStr)
         .lte('shift_date', endDateStr)
         .order('shift_date')
         .order('time_from');
 
       if (shiftsError) throw shiftsError;
+
+      const { data: openShifts, error: openShiftsError } = await supabase
+        .from('shifts')
+        .select('*')
+        .is('employee_id', null)
+        .eq('open_shift', true)
+        .gte('shift_date', startDateStr)
+        .lte('shift_date', endDateStr)
+        .order('shift_date')
+        .order('time_from');
+
+      if (openShiftsError) throw openShiftsError;
 
       const employeeShiftsData: EmployeeShifts[] = employees.map(employee => ({
         employee,
@@ -173,10 +187,14 @@ export function WeeklyOverview() {
         const regionEmployees = employeeShiftsData.filter(
           es => es.employee.region_id === region.id
         );
-        if (regionEmployees.length > 0) {
+        const regionOpenShifts = (openShifts || []).filter(
+          s => s.region_id === region.id
+        );
+        if (regionEmployees.length > 0 || regionOpenShifts.length > 0) {
           groupedByRegion.push({
             region,
             employeeShifts: regionEmployees,
+            openShifts: regionOpenShifts,
           });
         }
       });
@@ -188,6 +206,7 @@ export function WeeklyOverview() {
         groupedByRegion.push({
           region: null,
           employeeShifts: noRegionEmployees,
+          openShifts: [],
         });
       }
 
@@ -281,7 +300,7 @@ export function WeeklyOverview() {
   const handleShiftClick = (shift: Shift) => {
     setSelectedShift(shift);
     setEditForm({
-      employee_id: shift.employee_id,
+      employee_id: shift.employee_id || '',
       shift_date: shift.shift_date,
       time_from: shift.time_from,
       time_to: shift.time_to,
@@ -740,6 +759,55 @@ export function WeeklyOverview() {
                   </tr>
                   );
                 })}
+                {group.openShifts.length > 0 && (
+                  <tr className="bg-amber-50 border-t-2 border-amber-300">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-amber-900 sticky left-0 bg-amber-50 z-10 border-r border-slate-200">
+                      Offene Termine
+                    </td>
+                    {weekDays.map((day, dayIndex) => {
+                      const year = day.getFullYear();
+                      const month = String(day.getMonth() + 1).padStart(2, '0');
+                      const dayStr = String(day.getDate()).padStart(2, '0');
+                      const dateStr = `${year}-${month}-${dayStr}`;
+                      const openShiftsForDay = group.openShifts.filter(shift => shift.shift_date === dateStr);
+                      const isToday = day.toDateString() === new Date().toDateString();
+                      return (
+                        <td
+                          key={dayIndex}
+                          className={`px-3 py-3 text-xs ${
+                            isToday ? 'bg-amber-100' : 'bg-amber-50'
+                          }`}
+                        >
+                          <div className="min-h-[60px]">
+                            {openShiftsForDay.length > 0 && (
+                              <div className="space-y-1">
+                                {openShiftsForDay.map((shift) => (
+                                  <div
+                                    key={shift.id}
+                                    onClick={() => handleShiftClick(shift)}
+                                    className="w-full bg-amber-100 border-2 border-amber-400 rounded px-2 py-1.5 cursor-pointer hover:bg-amber-200 transition-colors text-left"
+                                  >
+                                    <div className="font-semibold text-amber-900 truncate">
+                                      {shift.client_name}
+                                    </div>
+                                    <div className="text-amber-800 mt-0.5">
+                                      {shift.time_from.substring(0, 5)} - {shift.time_to.substring(0, 5)}
+                                    </div>
+                                    {shift.notes && (
+                                      <div className="text-xs text-amber-700 mt-0.5 truncate" title={shift.notes}>
+                                        {shift.notes}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -895,12 +963,21 @@ export function WeeklyOverview() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div>
-                    <div className="text-sm text-gray-600">Person</div>
-                    <div className="text-lg font-medium text-gray-900">
-                      {getEmployeeName(selectedShift.employee_id)}
+                  {selectedShift.employee_id ? (
+                    <div>
+                      <div className="text-sm text-gray-600">Person</div>
+                      <div className="text-lg font-medium text-gray-900">
+                        {getEmployeeName(selectedShift.employee_id)}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div>
+                      <div className="text-sm text-gray-600">Art</div>
+                      <div className="text-lg font-medium text-amber-900">
+                        Offener Termin
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <div className="text-sm text-gray-600">Datum</div>
                     <div className="text-lg font-medium text-gray-900">

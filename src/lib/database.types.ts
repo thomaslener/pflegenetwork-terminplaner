@@ -64,7 +64,7 @@ export interface Database {
       shifts: {
         Row: {
           id: string
-          employee_id: string
+          employee_id: string | null
           shift_date: string
           time_from: string
           time_to: string
@@ -76,10 +76,11 @@ export interface Database {
           seeking_replacement: boolean
           original_employee_id: string | null
           open_shift: boolean
+          region_id: string | null
         }
         Insert: {
           id?: string
-          employee_id: string
+          employee_id?: string | null
           shift_date: string
           time_from: string
           time_to: string
@@ -91,10 +92,11 @@ export interface Database {
           seeking_replacement?: boolean
           original_employee_id?: string | null
           open_shift?: boolean
+          region_id?: string | null
         }
         Update: {
           id?: string
-          employee_id?: string
+          employee_id?: string | null
           shift_date?: string
           time_from?: string
           time_to?: string
@@ -106,6 +108,7 @@ export interface Database {
           seeking_replacement?: boolean
           original_employee_id?: string | null
           open_shift?: boolean
+          region_id?: string | null
         }
       }
       weekly_templates: {

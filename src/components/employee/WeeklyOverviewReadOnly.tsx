@@ -33,6 +33,7 @@ interface EmployeeShifts {
 interface RegionGroup {
   region: RegionExtended | null;
   employeeShifts: EmployeeShifts[];
+  openShifts: Shift[];
 }
 
 // Color palette for regions
@@ -167,6 +168,7 @@ export function WeeklyOverviewReadOnly() {
       const { data: allShifts, error: shiftsError } = await supabase
         .from('shifts')
         .select('*')
+        .not('employee_id', 'is', null)
         .gte('shift_date', startDateStr)
         .lte('shift_date', endDateStr)
         .order('shift_date')
@@ -174,9 +176,24 @@ export function WeeklyOverviewReadOnly() {
 
       if (shiftsError) throw shiftsError;
 
+      // Get open shifts for regions in this federal state
+      const regionIds = regions.map(r => r.id);
+      const { data: openShifts, error: openShiftsError } = await supabase
+        .from('shifts')
+        .select('*')
+        .is('employee_id', null)
+        .eq('open_shift', true)
+        .in('region_id', regionIds)
+        .gte('shift_date', startDateStr)
+        .lte('shift_date', endDateStr)
+        .order('shift_date')
+        .order('time_from');
+
+      if (openShiftsError) throw openShiftsError;
+
       // Filter shifts to only include those from employees in the same federal state
       const filteredShifts = (allShifts || []).filter(shift =>
-        filteredEmployeeIds.has(shift.employee_id)
+        shift.employee_id && filteredEmployeeIds.has(shift.employee_id)
       );
       console.log('Filtered shifts:', filteredShifts.map(s => ({ employee_id: s.employee_id, seeking: s.seeking_replacement, date: s.shift_date })));
 
@@ -192,10 +209,14 @@ export function WeeklyOverviewReadOnly() {
         const regionEmployees = employeeShiftsData.filter(
           es => es.employee.region_id === region.id
         );
-        if (regionEmployees.length > 0) {
+        const regionOpenShifts = (openShifts || []).filter(
+          s => s.region_id === region.id
+        );
+        if (regionEmployees.length > 0 || regionOpenShifts.length > 0) {
           groupedByRegion.push({
             region,
             employeeShifts: regionEmployees,
+            openShifts: regionOpenShifts,
           });
         }
       });
@@ -207,6 +228,7 @@ export function WeeklyOverviewReadOnly() {
         groupedByRegion.push({
           region: null,
           employeeShifts: noRegionEmployees,
+          openShifts: [],
         });
       }
 
@@ -794,6 +816,55 @@ export function WeeklyOverviewReadOnly() {
                   </tr>
                   );
                 })}
+                {group.openShifts.length > 0 && (
+                  <tr className="bg-amber-50 border-t-2 border-amber-300">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-amber-900 sticky left-0 bg-amber-50 z-10 border-r border-slate-200">
+                      Offene Termine
+                    </td>
+                    {weekDays.map((day, dayIndex) => {
+                      const year = day.getFullYear();
+                      const month = String(day.getMonth() + 1).padStart(2, '0');
+                      const dayStr = String(day.getDate()).padStart(2, '0');
+                      const dateStr = `${year}-${month}-${dayStr}`;
+                      const openShiftsForDay = group.openShifts.filter(shift => shift.shift_date === dateStr);
+                      const isToday = day.toDateString() === new Date().toDateString();
+                      return (
+                        <td
+                          key={dayIndex}
+                          className={`px-3 py-3 text-xs ${
+                            isToday ? 'bg-amber-100' : 'bg-amber-50'
+                          }`}
+                        >
+                          <div className="min-h-[60px]">
+                            {openShiftsForDay.length > 0 && (
+                              <div className="space-y-1">
+                                {openShiftsForDay.map((shift) => (
+                                  <div
+                                    key={shift.id}
+                                    onClick={() => handleShiftClick(shift)}
+                                    className="w-full bg-amber-100 border-2 border-amber-400 rounded px-2 py-1.5 cursor-pointer hover:bg-amber-200 transition-colors text-left"
+                                  >
+                                    <div className="font-semibold text-amber-900 truncate">
+                                      {shift.client_name}
+                                    </div>
+                                    <div className="text-amber-800 mt-0.5">
+                                      {shift.time_from.substring(0, 5)} - {shift.time_to.substring(0, 5)}
+                                    </div>
+                                    {shift.notes && (
+                                      <div className="text-xs text-amber-700 mt-0.5 truncate" title={shift.notes}>
+                                        {shift.notes}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

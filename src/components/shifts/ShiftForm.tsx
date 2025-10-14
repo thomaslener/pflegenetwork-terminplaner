@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
 import type { Database } from '../../lib/database.types';
 import { ClientAutocomplete } from '../shared/ClientAutocomplete';
 
 type Shift = Database['public']['Tables']['shifts']['Row'];
+type Region = Database['public']['Tables']['regions']['Row'];
 
 interface ShiftFormProps {
   shift: Shift | null;
@@ -19,9 +21,15 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
     client_name: '',
     notes: '',
     open_shift: false,
+    region_id: '',
   });
+  const [regions, setRegions] = useState<Region[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadRegions();
+  }, []);
 
   useEffect(() => {
     if (shift) {
@@ -32,9 +40,25 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
         client_name: shift.client_name,
         notes: shift.notes || '',
         open_shift: !!shift.open_shift,
+        region_id: shift.region_id || '',
       });
     }
   }, [shift]);
+
+  const loadRegions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('regions')
+        .select('*')
+        .order('sort_order')
+        .order('name');
+
+      if (error) throw error;
+      setRegions(data || []);
+    } catch (error) {
+      console.error('Error loading regions:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,11 +162,32 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
             <span>
               Offener Termin
               <span className="block text-xs font-normal text-gray-500">
-                Offene Termine erscheinen für Partner im selben Bundesland in einer eigenen Liste.
+                Offene Termine werden keiner Person zugewiesen und erscheinen in der Wochenübersicht unter "Offene Termine".
               </span>
             </span>
           </label>
         </div>
+
+        {formData.open_shift && (
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Region *
+            </label>
+            <select
+              value={formData.region_id}
+              onChange={(e) => setFormData({ ...formData, region_id: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              required={formData.open_shift}
+            >
+              <option value="">Region auswählen...</option>
+              {regions.map(region => (
+                <option key={region.id} value={region.id}>
+                  {region.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2 mt-4">
