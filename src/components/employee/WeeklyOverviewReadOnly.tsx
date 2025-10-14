@@ -486,20 +486,28 @@ export function WeeklyOverviewReadOnly() {
     try {
       const { data: shift } = await supabase
         .from('shifts')
-        .select('employee_id')
+        .select('employee_id, open_shift')
         .eq('id', shiftId)
         .single();
 
       if (!shift) throw new Error('Shift not found');
 
+      const updates: any = {
+        employee_id: profile.id,
+        seeking_replacement: false,
+        open_shift: false,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (shift.open_shift) {
+        updates.original_employee_id = null;
+      } else if (shift.employee_id) {
+        updates.original_employee_id = shift.employee_id;
+      }
+
       const { error } = await supabase
         .from('shifts')
-        .update({
-          original_employee_id: shift.employee_id,
-          employee_id: profile.id,
-          seeking_replacement: false,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updates)
         .eq('id', shiftId);
 
       if (error) throw error;
@@ -841,8 +849,7 @@ export function WeeklyOverviewReadOnly() {
                                 {openShiftsForDay.map((shift) => (
                                   <div
                                     key={shift.id}
-                                    onClick={() => handleShiftClick(shift)}
-                                    className="w-full bg-amber-100 border-2 border-amber-400 rounded px-2 py-1.5 cursor-pointer hover:bg-amber-200 transition-colors text-left"
+                                    className="w-full bg-amber-100 border-2 border-amber-400 rounded px-2 py-1.5 transition-colors text-left"
                                   >
                                     <div className="font-semibold text-amber-900 truncate">
                                       {shift.client_name}
@@ -855,6 +862,15 @@ export function WeeklyOverviewReadOnly() {
                                         {shift.notes}
                                       </div>
                                     )}
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleTakeOver(shift.id);
+                                      }}
+                                      className="w-full mt-1 bg-amber-600 hover:bg-amber-700 text-[#2e2e2e] text-xs font-bold py-1.5 px-2 rounded transition-colors"
+                                    >
+                                      Termin übernehmen
+                                    </button>
                                   </div>
                                 ))}
                               </div>
