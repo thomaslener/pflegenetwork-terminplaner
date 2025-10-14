@@ -1,4 +1,4 @@
-import { Pencil, Trash2, Clock, User, Users, FileText, MapPin } from 'lucide-react';
+import { Pencil, Trash2, Clock, User, Users, FileText, MapPin, Check } from 'lucide-react';
 import type { Database } from '../../lib/database.types';
 
 type Shift = Database['public']['Tables']['shifts']['Row'] & {
@@ -86,7 +86,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
         return (
           <div
             key={shift.id}
-            className={`rounded-lg p-4 transition-all ${cardClasses}`}
+            className={`rounded-lg p-4 transition-all relative ${cardClasses}`}
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
@@ -150,19 +150,6 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                     {shift.notes}
                   </div>
                 )}
-
-                {canTakeOver && (
-                  <button
-                    onClick={() => onTakeOver?.(shift.id)}
-                    className={`mt-4 w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all ${
-                      isOpenShift
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md'
-                        : 'bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md'
-                    }`}
-                  >
-                    {isOpenShift ? 'Termin übernehmen' : 'Vertretung übernehmen'}
-                  </button>
-                )}
               </div>
 
               {!isReplacementRequest && isOwnShift && (
@@ -184,6 +171,22 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                 </div>
               )}
             </div>
+
+            {canTakeOver && (
+              <div className="flex justify-end mt-3">
+                <button
+                  onClick={() => onTakeOver?.(shift.id)}
+                  className={`inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg font-medium text-xs transition-all ${
+                    isOpenShift
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md'
+                      : 'bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md'
+                  }`}
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  Annehmen
+                </button>
+              </div>
+            )}
           </div>
         );
   };
