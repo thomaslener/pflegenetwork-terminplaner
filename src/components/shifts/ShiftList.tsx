@@ -81,7 +81,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
           ? 'bg-blue-50 border-2 border-blue-300 border-dashed hover:shadow-lg'
           : isReplacementRequest
           ? 'bg-yellow-50 border-2 border-yellow-300 border-dashed hover:shadow-lg'
-          : 'bg-white border border-slate-200 hover:shadow-md';
+          : 'bg-green-50 border-2 border-green-300 hover:shadow-lg';
 
         return (
           <div
@@ -90,6 +90,10 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
+                <div className="text-lg text-gray-900 mb-2">
+                  {shift.client_name}
+                </div>
+
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   {isOpenShift && (
                     <span className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
@@ -117,10 +121,6 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                       {shift.region_name}
                     </span>
                   )}
-                </div>
-
-                <div className="text-lg text-gray-900 mb-2">
-                  {shift.client_name}
                 </div>
 
                 <div className="flex items-center gap-3 text-sm text-gray-600 mb-2">
