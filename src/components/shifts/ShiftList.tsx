@@ -86,11 +86,11 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
         return (
           <div
             key={shift.id}
-            className={`rounded-lg p-5 transition-all ${cardClasses}`}
+            className={`rounded-lg p-4 transition-all ${cardClasses}`}
           >
-            <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
                   {isOpenShift && (
                     <span className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
                       Offener Termin
@@ -119,20 +119,17 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                   )}
                 </div>
 
-                <div className="text-lg font-bold text-gray-900 mb-2">
-                  {formatDate(shift.shift_date)}
+                <div className="text-lg text-gray-900 mb-2">
+                  {shift.client_name}
                 </div>
 
-                <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
+                <div className="flex items-center gap-3 text-sm text-gray-600 mb-2">
                   <div className="flex items-center gap-1.5">
                     <Clock className="w-4 h-4 text-primary-600" />
                     <span className="font-medium">{formatTime(shift.time_from)} - {formatTime(shift.time_to)}</span>
                   </div>
                   <span className="text-gray-300">•</span>
-                  <div className="flex items-center gap-1.5">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <span className="font-medium">{shift.client_name}</span>
-                  </div>
+                  <span className="font-medium">{formatDate(shift.shift_date)}</span>
                 </div>
 
                 {(isOpenShift || isReplacementRequest) && shift.employee_name && (
