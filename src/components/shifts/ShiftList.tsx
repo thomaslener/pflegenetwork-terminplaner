@@ -39,11 +39,11 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
     const diffTime = shiftDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return 'heute';
-    if (diffDays === 1) return 'morgen';
-    if (diffDays > 1) return `in ${diffDays} Tagen`;
-    if (diffDays === -1) return 'gestern';
-    if (diffDays < -1) return `vor ${Math.abs(diffDays)} Tagen`;
+    if (diffDays === 0) return 'HEUTE';
+    if (diffDays === 1) return 'MORGEN';
+    if (diffDays > 1) return `IN ${diffDays} TAGEN`;
+    if (diffDays === -1) return 'GESTERN';
+    if (diffDays < -1) return `VOR ${Math.abs(diffDays)} TAGEN`;
     return '';
   };
 
