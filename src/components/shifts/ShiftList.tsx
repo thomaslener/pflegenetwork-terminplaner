@@ -99,43 +99,41 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
               </div>
             )}
 
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="text-lg text-gray-900">{shift.client_name}</span>
-                  {isOwnSeekingReplacement && (
-                    <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                      Vertretung wird gesucht
-                    </span>
-                  )}
-                  {!isOpenShift && !isReplacementRequest && !isOwnSeekingReplacement && !isReplacementRequest && isReplacementShift(shift) && (
-                    <span className="inline-flex items-center gap-1 bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                      Vertretung für {shift.original_employee_name}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between text-sm text-gray-600 mb-1 pr-4">
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4" />
-                    <span className="font-medium">{formatDate(shift.shift_date).weekday}, {formatDate(shift.shift_date).dateStr}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 whitespace-nowrap">
-                    <Clock className="w-4 h-4" />
-                    <span className="font-medium">{formatTime(shift.time_from)} - {formatTime(shift.time_to)}</span>
-                  </div>
-                </div>
-
-
-                {shift.notes && (
-                  <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
-                    {shift.notes}
-                  </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span className="text-lg text-gray-900">{shift.client_name}</span>
+                {isOwnSeekingReplacement && (
+                  <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                    Vertretung wird gesucht
+                  </span>
+                )}
+                {!isOpenShift && !isReplacementRequest && !isOwnSeekingReplacement && !isReplacementRequest && isReplacementShift(shift) && (
+                  <span className="inline-flex items-center gap-1 bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                    Vertretung für {shift.original_employee_name}
+                  </span>
                 )}
               </div>
 
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4" />
+                  <span className="font-medium">{formatDate(shift.shift_date).weekday}, {formatDate(shift.shift_date).dateStr}</span>
+                </div>
+                <div className="flex items-center gap-1.5 whitespace-nowrap">
+                  <Clock className="w-4 h-4" />
+                  <span className="font-medium">{formatTime(shift.time_from)} - {formatTime(shift.time_to)}</span>
+                </div>
+              </div>
+
+
+              {shift.notes && (
+                <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
+                  {shift.notes}
+                </div>
+              )}
+
               {!isReplacementRequest && isOwnShift && (
-                <div className="flex gap-1">
+                <div className="flex gap-1 mt-2">
                   <button
                     onClick={() => onEdit(shift)}
                     className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
