@@ -18,6 +18,7 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
     time_to: '',
     client_name: '',
     notes: '',
+    open_shift: false,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +31,7 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
         time_to: shift.time_to,
         client_name: shift.client_name,
         notes: shift.notes || '',
+        open_shift: !!shift.open_shift,
       });
     }
   }, [shift]);
@@ -123,6 +125,23 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
             rows={3}
             placeholder="Optional"
           />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="flex items-start gap-3 text-sm font-medium text-gray-700">
+            <input
+              type="checkbox"
+              checked={formData.open_shift}
+              onChange={(e) => setFormData({ ...formData, open_shift: e.target.checked })}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span>
+              Offener Termin
+              <span className="block text-xs font-normal text-gray-500">
+                Offene Termine erscheinen für Partner im selben Bundesland in einer eigenen Liste.
+              </span>
+            </span>
+          </label>
         </div>
       </div>
 

@@ -12,9 +12,10 @@ interface ShiftListProps {
   onDelete: (id: string) => void;
   onTakeOver?: (id: string) => void;
   currentUserId?: string;
+  emptyMessage?: string;
 }
 
-export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId }: ShiftListProps) {
+export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId, emptyMessage }: ShiftListProps) {
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('de-DE', {
       weekday: 'short',
@@ -35,7 +36,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId 
   if (shifts.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500 bg-white border border-slate-200 rounded-lg">
-        Keine Termine vorhanden. Fügen Sie einen neuen Termin hinzu.
+        {emptyMessage || 'Keine Termine vorhanden. Fügen Sie einen neuen Termin hinzu.'}
       </div>
     );
   }
@@ -44,19 +45,48 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId 
     <div className="space-y-3">
       {shifts.map((shift) => {
         const isOwnShift = currentUserId && shift.employee_id === currentUserId;
-        const isReplacementRequest = shift.seeking_replacement && onTakeOver && !isOwnShift;
+        const isOpenShift = shift.open_shift;
+        const isReplacementRequest = !isOpenShift && shift.seeking_replacement && onTakeOver && !isOwnShift;
         const isOwnSeekingReplacement = shift.seeking_replacement && isOwnShift;
+        const canTakeOver = onTakeOver && !isOwnShift && (isReplacementRequest || isOpenShift);
+        const cardClasses = isOpenShift
+          ? 'bg-blue-50 border-2 border-blue-300 border-dashed hover:shadow-md hover:border-blue-400'
+          : isReplacementRequest
+          ? 'bg-yellow-50 border-2 border-yellow-300 border-dashed hover:shadow-md hover:border-yellow-400'
+          : 'bg-white border border-slate-200 hover:shadow-md';
+        const primaryTextColor = isOpenShift ? 'text-blue-900' : isReplacementRequest ? 'text-yellow-900' : 'text-gray-900';
+        const dividerColor = isOpenShift ? 'text-blue-300' : isReplacementRequest ? 'text-yellow-400' : 'text-gray-400';
+        const timeRangeColor = isOpenShift ? 'text-blue-700' : isReplacementRequest ? 'text-yellow-800' : 'text-gray-700';
+        const clockIconColor = isOpenShift ? 'text-blue-600' : isReplacementRequest ? 'text-yellow-600' : 'text-primary-600';
+        const userIconColor = isOpenShift ? 'text-blue-600' : isReplacementRequest ? 'text-yellow-600' : 'text-gray-400';
+        const notesClasses = isOpenShift
+          ? 'text-blue-700 bg-blue-100'
+          : isReplacementRequest
+          ? 'text-yellow-700 bg-yellow-100'
+          : 'text-gray-600 bg-slate-50';
+        const takeoverButtonClasses = isOpenShift
+          ? 'mt-3 bg-blue-600 hover:bg-blue-700 text-[#2e2e2e] text-sm font-semibold py-2 px-4 rounded-lg transition-colors shadow-sm'
+          : 'mt-3 bg-green-600 hover:bg-green-700 text-[#2e2e2e] text-sm font-semibold py-2 px-4 rounded-lg transition-colors shadow-sm';
+        const takeoverLabel = isOpenShift ? 'Termin übernehmen' : 'Vertretung übernehmen?';
 
         return (
           <div
             key={shift.id}
-            className={`rounded-lg p-4 transition-shadow ${
-              isReplacementRequest
-                ? 'bg-yellow-50 border-2 border-yellow-300 border-dashed hover:shadow-md hover:border-yellow-400'
-                : 'bg-white border border-slate-200 hover:shadow-md'
-            }`}
+            className={`rounded-lg p-4 transition-shadow ${cardClasses}`}
           >
-            {isReplacementRequest && (
+            {isOpenShift && (
+              <div className="mb-3 flex items-center gap-2">
+                <span className="bg-blue-200 px-3 py-1 rounded-full text-blue-800 font-semibold text-sm">Offener Termin</span>
+                {shift.employee_name && (
+                  <div className="flex items-center gap-1.5 text-blue-700 text-sm">
+                    <Users className="w-4 h-4" />
+                    <span>{shift.employee_name} hat diesen Termin erstellt</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isOpenShift && isReplacementRequest && (
               <div className="mb-3 flex items-center gap-2">
                 <span className="bg-yellow-200 px-3 py-1 rounded-full text-yellow-800 font-semibold text-sm">Vertretungsanfrage</span>
                 {shift.employee_name && (
@@ -79,35 +109,23 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId 
             <div className="flex items-start justify-between">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-3">
-                  <div className={`flex items-center gap-2 font-medium ${
-                    isReplacementRequest ? 'text-yellow-900' : 'text-gray-900'
-                  }`}>
-                    <Clock className={`w-4 h-4 ${
-                      isReplacementRequest ? 'text-yellow-600' : 'text-primary-600'
-                    }`} />
+                  <div className={`flex items-center gap-2 font-medium ${primaryTextColor}`}>
+                    <Clock className={`w-4 h-4 ${clockIconColor}`} />
                     <span>{formatDate(shift.shift_date)}</span>
                   </div>
-                  <span className={isReplacementRequest ? 'text-yellow-400' : 'text-gray-400'}>•</span>
-                  <span className={isReplacementRequest ? 'text-yellow-800' : 'text-gray-700'}>
+                  <span className={dividerColor}>•</span>
+                  <span className={timeRangeColor}>
                     {formatTime(shift.time_from)} - {formatTime(shift.time_to)}
                   </span>
                 </div>
 
-                <div className={`flex items-center gap-2 ${
-                  isReplacementRequest ? 'text-yellow-900' : 'text-gray-900'
-                }`}>
-                  <User className={`w-4 h-4 ${
-                    isReplacementRequest ? 'text-yellow-600' : 'text-gray-400'
-                  }`} />
+                <div className={`flex items-center gap-2 ${primaryTextColor}`}>
+                  <User className={`w-4 h-4 ${userIconColor}`} />
                   <span className="font-medium">{shift.client_name}</span>
                 </div>
 
                 {shift.notes && (
-                  <div className={`text-sm p-3 rounded-lg ${
-                    isReplacementRequest
-                      ? 'text-yellow-700 bg-yellow-100'
-                      : 'text-gray-600 bg-slate-50'
-                  }`}>
+                  <div className={`text-sm p-3 rounded-lg ${notesClasses}`}>
                     {shift.notes}
                   </div>
                 )}
@@ -120,12 +138,20 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId 
                   </div>
                 )}
 
-                {isReplacementRequest && (
+                {isOwnShift && isOpenShift && (
+                  <div className="mt-3 bg-blue-100 px-3 py-2 rounded-lg">
+                    <span className="text-blue-800 font-semibold text-sm">
+                      Dieser Termin ist als offen markiert
+                    </span>
+                  </div>
+                )}
+
+                {canTakeOver && (
                   <button
-                    onClick={() => onTakeOver(shift.id)}
-                    className="mt-3 bg-green-600 hover:bg-green-700 text-[#2e2e2e] text-sm font-semibold py-2 px-4 rounded-lg transition-colors shadow-sm"
+                    onClick={() => onTakeOver?.(shift.id)}
+                    className={takeoverButtonClasses}
                   >
-                    Vertretung übernehmen?
+                    {takeoverLabel}
                   </button>
                 )}
               </div>
