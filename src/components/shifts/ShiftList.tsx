@@ -140,7 +140,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                 </div>
               </div>
 
-              <div className="text-xs text-gray-400 ml-5">
+              <div className="text-xs text-gray-700 font-medium ml-5">
                 {getRelativeDate(shift.shift_date)}
               </div>
 
