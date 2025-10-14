@@ -800,7 +800,7 @@ export function WeeklyOverviewReadOnly() {
                                     {canTakeOver && (
                                       <button
                                         onClick={() => handleTakeOver(shift.id)}
-                                        className="w-full mt-1 bg-green-600 hover:bg-green-700 text-[#2e2e2e] text-xs font-bold py-1.5 px-2 rounded transition-colors"
+                                        className="w-full mt-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 px-2 rounded transition-colors"
                                       >
                                         Vertretung übernehmen?
                                       </button>
