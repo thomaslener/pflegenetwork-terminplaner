@@ -877,7 +877,7 @@ export function WeeklyOverviewReadOnly() {
                                         e.stopPropagation();
                                         handleTakeOver(shift.id);
                                       }}
-                                      className="w-full mt-1 bg-amber-600 hover:bg-amber-700 text-[#2e2e2e] text-xs font-bold py-1.5 px-2 rounded transition-colors"
+                                      className="w-full mt-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-1.5 px-2 rounded transition-colors"
                                     >
                                       Termin übernehmen
                                     </button>

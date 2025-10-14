@@ -92,8 +92,8 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
           ? 'text-yellow-700 bg-yellow-100'
           : 'text-gray-600 bg-slate-50';
         const takeoverButtonClasses = isOpenShift
-          ? 'mt-3 bg-blue-600 hover:bg-blue-700 text-[#2e2e2e] text-sm font-semibold py-2 px-4 rounded-lg transition-colors shadow-sm'
-          : 'mt-3 bg-green-600 hover:bg-green-700 text-[#2e2e2e] text-sm font-semibold py-2 px-4 rounded-lg transition-colors shadow-sm';
+          ? 'mt-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-colors shadow-sm'
+          : 'mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-colors shadow-sm';
         const takeoverLabel = isOpenShift ? 'Termin übernehmen' : 'Vertretung übernehmen?';
 
         return (
