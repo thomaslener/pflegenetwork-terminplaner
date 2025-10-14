@@ -56,9 +56,26 @@ export function MyShifts() {
 
       const originalProfileMap = new Map(originalProfiles?.map(p => [p.id, p.full_name]) || []);
 
+      // Load region names for own shifts
+      const ownShiftRegionIds = [...new Set(ownShiftsData?.map(s => s.region_id).filter((id): id is string => !!id) || [])];
+
+      let ownShiftRegions: { id: string; name: string }[] | null = [];
+
+      if (ownShiftRegionIds.length > 0) {
+        const { data: regionData } = await supabase
+          .from('regions')
+          .select('id, name')
+          .in('id', ownShiftRegionIds);
+
+        ownShiftRegions = regionData;
+      }
+
+      const ownShiftRegionMap = new Map(ownShiftRegions?.map(r => [r.id, r.name]) || []);
+
       const ownShiftsWithNames = ownShiftsData?.map(shift => ({
         ...shift,
-        original_employee_name: shift.original_employee_id ? originalProfileMap.get(shift.original_employee_id) : undefined
+        original_employee_name: shift.original_employee_id ? originalProfileMap.get(shift.original_employee_id) : undefined,
+        region_name: shift.region_id ? ownShiftRegionMap.get(shift.region_id) : undefined
       })) || [];
 
       const { data: currentUserProfile } = await supabase
