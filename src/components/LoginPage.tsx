@@ -1,44 +1,24 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { LogIn, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 
 export function LoginPage() {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
     setLoading(true);
 
     try {
-      if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: fullName,
-            },
-          },
-        });
-        if (error) throw error;
-        setSuccess('Konto erfolgreich erstellt! Sie können sich jetzt anmelden.');
-        setMode('signin');
-        setPassword('');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
     } catch (error: any) {
       setError(error.message || 'Fehler beim Anmelden');
     } finally {
@@ -55,7 +35,7 @@ export function LoginPage() {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">pflege network Terminplaner</h1>
           <p className="text-gray-600">
-            {mode === 'signin' ? 'Melden Sie sich an' : 'Konto erstellen'}
+            Melden Sie sich an
           </p>
         </div>
 
@@ -65,27 +45,7 @@ export function LoginPage() {
           </div>
         )}
 
-        {success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-800 text-sm">{success}</p>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-4">
-          {mode === 'signup' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vollständiger Name
-              </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="Max Mustermann"
-              />
-            </div>
-          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -126,24 +86,9 @@ export function LoginPage() {
             disabled={loading}
             className="w-full bg-primary-600 hover:bg-primary-700 text-[#2e2e2e] font-bold py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Lädt...' : mode === 'signin' ? 'Anmelden' : 'Registrieren'}
+            {loading ? 'Lädt...' : 'Anmelden'}
           </button>
         </form>
-
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => {
-              setMode(mode === 'signin' ? 'signup' : 'signin');
-              setError(null);
-              setSuccess(null);
-            }}
-            className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-          >
-            {mode === 'signin'
-              ? 'Noch kein Konto? Jetzt registrieren'
-              : 'Bereits registriert? Anmelden'}
-          </button>
-        </div>
       </div>
     </div>
   );
