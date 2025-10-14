@@ -32,6 +32,21 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
     return time.substring(0, 5);
   };
 
+  const getRelativeDate = (date: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const shiftDate = new Date(`${date}T00:00:00`);
+    const diffTime = shiftDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'heute';
+    if (diffDays === 1) return 'morgen';
+    if (diffDays > 1) return `in ${diffDays} Tagen`;
+    if (diffDays === -1) return 'gestern';
+    if (diffDays < -1) return `vor ${Math.abs(diffDays)} Tagen`;
+    return '';
+  };
+
   const isReplacementShift = (shift: Shift) => {
     return shift.original_employee_id && shift.original_employee_name;
   };
@@ -125,32 +140,35 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                 </div>
               </div>
 
+              <div className="text-xs text-gray-400 ml-5">
+                {getRelativeDate(shift.shift_date)}
+              </div>
 
               {shift.notes && (
                 <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
                   {shift.notes}
                 </div>
               )}
-
-              {!isReplacementRequest && isOwnShift && (
-                <div className="flex gap-1 mt-2">
-                  <button
-                    onClick={() => onEdit(shift)}
-                    className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                    title="Bearbeiten"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => onDelete(shift.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Löschen"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
             </div>
+
+            {!isReplacementRequest && isOwnShift && (
+              <div className="flex gap-1 absolute bottom-4 left-4">
+                <button
+                  onClick={() => onEdit(shift)}
+                  className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                  title="Bearbeiten"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onDelete(shift.id)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Löschen"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            )}
 
             {canTakeOver && (
               <div className="flex justify-end mt-3">
