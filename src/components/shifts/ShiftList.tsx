@@ -1,9 +1,10 @@
-import { Pencil, Trash2, Clock, User, Users, FileText } from 'lucide-react';
+import { Pencil, Trash2, Clock, User, Users, FileText, MapPin } from 'lucide-react';
 import type { Database } from '../../lib/database.types';
 
 type Shift = Database['public']['Tables']['shifts']['Row'] & {
   employee_name?: string;
   original_employee_name?: string;
+  region_name?: string;
 };
 
 interface ShiftListProps {
@@ -102,8 +103,14 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
             className={`rounded-lg p-4 transition-shadow ${cardClasses}`}
           >
             {isOpenShift && (
-              <div className="mb-3 flex items-center gap-2">
+              <div className="mb-3 flex items-center gap-2 flex-wrap">
                 <span className="bg-blue-200 px-3 py-1 rounded-full text-blue-800 font-semibold text-sm">Offener Termin</span>
+                {shift.region_name && (
+                  <div className="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded text-sm">
+                    <MapPin className="w-3.5 h-3.5 text-slate-600" />
+                    <span className="text-slate-700 font-medium">{shift.region_name}</span>
+                  </div>
+                )}
                 {shift.employee_name && (
                   <div className="flex items-center gap-1.5 text-blue-700 text-sm">
                     <Users className="w-4 h-4" />
@@ -114,8 +121,14 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
             )}
 
             {!isOpenShift && isReplacementRequest && (
-              <div className="mb-3 flex items-center gap-2">
+              <div className="mb-3 flex items-center gap-2 flex-wrap">
                 <span className="bg-yellow-200 px-3 py-1 rounded-full text-yellow-800 font-semibold text-sm">Vertretungsanfrage</span>
+                {shift.region_name && (
+                  <div className="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded text-sm">
+                    <MapPin className="w-3.5 h-3.5 text-slate-600" />
+                    <span className="text-slate-700 font-medium">{shift.region_name}</span>
+                  </div>
+                )}
                 {shift.employee_name && (
                   <div className="flex items-center gap-1.5 text-yellow-700 text-sm">
                     <Users className="w-4 h-4" />

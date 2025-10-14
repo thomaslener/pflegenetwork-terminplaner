@@ -11,6 +11,7 @@ type Shift = Database['public']['Tables']['shifts']['Row'];
 type ShiftWithEmployee = Shift & {
   employee_name?: string;
   original_employee_name?: string;
+  region_name?: string;
 };
 
 export function MyShifts() {
@@ -136,14 +137,35 @@ export function MyShifts() {
 
             const profileMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
 
+            // Load region names
+            const uniqueRegionIds = [...new Set([
+              ...(replacementShiftsData?.map(s => s.region_id).filter((id): id is string => !!id) || []),
+              ...(openShiftsData?.map(s => s.region_id).filter((id): id is string => !!id) || [])
+            ])];
+
+            let regions: { id: string; name: string }[] | null = [];
+
+            if (uniqueRegionIds.length > 0) {
+              const { data: regionData } = await supabase
+                .from('regions')
+                .select('id, name')
+                .in('id', uniqueRegionIds);
+
+              regions = regionData;
+            }
+
+            const regionMap = new Map(regions?.map(r => [r.id, r.name]) || []);
+
             replacementShiftsWithNames = replacementShiftsData?.map(shift => ({
               ...shift,
-              employee_name: profileMap.get(shift.employee_id) || 'Unbekannt'
+              employee_name: profileMap.get(shift.employee_id) || 'Unbekannt',
+              region_name: shift.region_id ? regionMap.get(shift.region_id) : undefined
             })) || [];
 
             openShiftsWithNames = openShiftsData?.map(shift => ({
               ...shift,
-              employee_name: shift.employee_id ? profileMap.get(shift.employee_id) || 'Unbekannt' : undefined
+              employee_name: shift.employee_id ? profileMap.get(shift.employee_id) || 'Unbekannt' : undefined,
+              region_name: shift.region_id ? regionMap.get(shift.region_id) : undefined
             })) || [];
           }
         }
