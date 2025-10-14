@@ -290,106 +290,110 @@ export function MyShifts() {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">Meine Termine</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">Meine Termine</h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={previousMonth}
+            className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            title="Vorheriger Monat"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="px-4 py-2 border border-gray-300 rounded-lg bg-white min-w-[180px] text-center">
+            <span className="font-medium text-gray-900 capitalize">{monthName}</span>
+          </div>
+          <button
+            onClick={nextMonth}
+            className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            title="Nächster Monat"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
+      </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={previousMonth}
-              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              title="Vorheriger Monat"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <div className="px-4 py-2 border border-gray-300 rounded-lg bg-white min-w-[180px] text-center">
-              <span className="font-medium text-gray-900 capitalize">{monthName}</span>
+      {showForm && (
+        <ShiftForm
+          shift={editingShift}
+          onSave={handleSaveShift}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingShift(null);
+          }}
+          onSeekReplacement={handleSeekReplacement}
+        />
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900">Meine Termine</h3>
+              <p className="text-sm text-gray-500">Deine zugewiesenen Termine</p>
             </div>
             <button
-              onClick={nextMonth}
-              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              title="Nächster Monat"
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-[#2e2e2e] font-bold px-3 py-1.5 rounded-lg transition-colors text-sm"
             >
-              <ChevronRight className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
+              Neu
             </button>
           </div>
 
-          {!showForm && (
-            <button
-              onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-[#2e2e2e] font-bold px-4 py-2 rounded-lg transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              Termin hinzufügen
-            </button>
+          <ShiftList
+            shifts={ownShifts}
+            onEdit={handleEditShift}
+            onDelete={handleDeleteShift}
+            onTakeOver={handleTakeOver}
+            currentUserId={user?.id}
+            emptyMessage="Keine Termine vorhanden."
+          />
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900">Vertretung gesucht</h3>
+            <p className="text-sm text-gray-500">Termine aus deinem Bundesland</p>
+          </div>
+
+          {replacementShifts.length > 0 ? (
+            <ShiftList
+              shifts={replacementShifts}
+              onEdit={() => {}}
+              onDelete={() => {}}
+              onTakeOver={handleTakeOver}
+              currentUserId={user?.id}
+              emptyMessage="Aktuell werden keine Vertretungen gesucht."
+            />
+          ) : (
+            <div className="text-center py-10 text-gray-500 bg-white border border-slate-200 rounded-lg">
+              Aktuell werden keine Vertretungen gesucht.
+            </div>
           )}
         </div>
 
-        {showForm && (
-          <ShiftForm
-            shift={editingShift}
-            onSave={handleSaveShift}
-            onCancel={() => {
-              setShowForm(false);
-              setEditingShift(null);
-            }}
-            onSeekReplacement={handleSeekReplacement}
-          />
-        )}
-
-        <ShiftList
-          shifts={ownShifts}
-          onEdit={handleEditShift}
-          onDelete={handleDeleteShift}
-          onTakeOver={handleTakeOver}
-          currentUserId={user?.id}
-        />
-      </div>
-
-      <div className="border-t border-slate-200 pt-6 space-y-4">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-900">Vertretung gesucht</h3>
-          <p className="text-sm text-gray-500">Termine aus deinem Bundesland, die eine Vertretung benötigen.</p>
-        </div>
-
-        {replacementShifts.length > 0 ? (
-          <ShiftList
-            shifts={replacementShifts}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            onTakeOver={handleTakeOver}
-            currentUserId={user?.id}
-            emptyMessage="Aktuell werden keine Vertretungen gesucht."
-          />
-        ) : (
-          <div className="text-center py-10 text-gray-500 bg-white border border-slate-200 rounded-lg">
-            Aktuell werden keine Vertretungen gesucht.
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900">Offene Termine</h3>
+            <p className="text-sm text-gray-500">Noch nicht besetzte Termine</p>
           </div>
-        )}
-      </div>
 
-      <div className="border-t border-slate-200 pt-6 space-y-4">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-900">Offene Termine</h3>
-          <p className="text-sm text-gray-500">Noch nicht besetzte Termine aus deinem Bundesland.</p>
+          {openShifts.length > 0 ? (
+            <ShiftList
+              shifts={openShifts}
+              onEdit={() => {}}
+              onDelete={() => {}}
+              onTakeOver={handleTakeOver}
+              currentUserId={user?.id}
+              emptyMessage="Aktuell gibt es keine offenen Termine."
+            />
+          ) : (
+            <div className="text-center py-10 text-gray-500 bg-white border border-slate-200 rounded-lg">
+              Aktuell gibt es keine offenen Termine.
+            </div>
+          )}
         </div>
-
-        {openShifts.length > 0 ? (
-          <ShiftList
-            shifts={openShifts}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            onTakeOver={handleTakeOver}
-            currentUserId={user?.id}
-            emptyMessage="Aktuell gibt es keine offenen Termine."
-          />
-        ) : (
-          <div className="text-center py-10 text-gray-500 bg-white border border-slate-200 rounded-lg">
-            Aktuell gibt es keine offenen Termine.
-          </div>
-        )}
       </div>
     </div>
   );
