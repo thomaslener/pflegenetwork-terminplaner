@@ -18,12 +18,14 @@ interface ShiftListProps {
 
 export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId, emptyMessage }: ShiftListProps) {
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('de-DE', {
-      weekday: 'long',
+    const dateObj = new Date(date);
+    const weekday = dateObj.toLocaleDateString('de-DE', { weekday: 'long' });
+    const dateStr = dateObj.toLocaleDateString('de-DE', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
     });
+    return { weekday, dateStr };
   };
 
   const formatTime = (time: string) => {
@@ -121,7 +123,9 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
 
                 <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
                   <span className="font-medium">{formatTime(shift.time_from)} - {formatTime(shift.time_to)}</span>
-                  <span className="font-medium">{formatDate(shift.shift_date)}</span>
+                  <div className="text-right">
+                    <span className="font-medium">{formatDate(shift.shift_date).weekday}, {formatDate(shift.shift_date).dateStr}</span>
+                  </div>
                 </div>
 
                 {(isOpenShift || isReplacementRequest) && shift.employee_name && (
