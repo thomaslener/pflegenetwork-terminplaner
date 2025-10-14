@@ -99,21 +99,15 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
               </div>
             )}
 
-            {isOwnSeekingReplacement && (
-              <div className="absolute bottom-6 right-3">
-                <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                  Vertretung wird gesucht
-                </span>
-              </div>
-            )}
-
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <div className="text-lg text-gray-900 mb-2">
-                  {shift.client_name}
-                </div>
-
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <span className="text-lg text-gray-900">{shift.client_name}</span>
+                  {isOwnSeekingReplacement && (
+                    <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                      Vertretung wird gesucht
+                    </span>
+                  )}
                   {!isOpenShift && !isReplacementRequest && !isOwnSeekingReplacement && !isReplacementRequest && isReplacementShift(shift) && (
                     <span className="inline-flex items-center gap-1 bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
                       Vertretung für {shift.original_employee_name}
@@ -121,7 +115,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                   )}
                 </div>
 
-                <div className="flex items-center text-sm text-gray-600 mb-2">
+                <div className="flex items-center text-sm text-gray-600 mb-1">
                   <span className="font-medium">{formatDate(shift.shift_date).weekday}, {formatDate(shift.shift_date).dateStr}</span>
                   <div className="flex-1"></div>
                   <div className="text-right whitespace-nowrap">
@@ -130,7 +124,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                 </div>
 
                 {(isOpenShift || isReplacementRequest) && shift.employee_name && (
-                  <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-3">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-2">
                     <Users className="w-3.5 h-3.5" />
                     <span>
                       {isOpenShift ? `Erstellt von ${shift.employee_name}` : `${shift.employee_name} sucht Vertretung`}
@@ -139,7 +133,7 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                 )}
 
                 {shift.notes && (
-                  <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
+                  <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
                     {shift.notes}
                   </div>
                 )}
