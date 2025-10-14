@@ -119,12 +119,8 @@ export function ShiftList({ shifts, onEdit, onDelete, onTakeOver, currentUserId,
                   )}
                 </div>
 
-                <div className="flex items-center gap-3 text-sm text-gray-600 mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-primary-600" />
-                    <span className="font-medium">{formatTime(shift.time_from)} - {formatTime(shift.time_to)}</span>
-                  </div>
-                  <span className="text-gray-300">•</span>
+                <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                  <span className="font-medium">{formatTime(shift.time_from)} - {formatTime(shift.time_to)}</span>
                   <span className="font-medium">{formatDate(shift.shift_date)}</span>
                 </div>
 
