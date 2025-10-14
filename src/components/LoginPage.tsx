@@ -31,7 +31,7 @@ export function LoginPage() {
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4">
-            <img src="/pni2.svg" alt="pflege network" className="w-16 h-16" />
+            <img src="/pn3.svg" alt="pflege network" className="w-16 h-16" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">pflege network Terminplaner</h1>
           <p className="text-gray-600">
