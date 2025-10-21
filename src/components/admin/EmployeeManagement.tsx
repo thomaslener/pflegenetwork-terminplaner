@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { api } from '../../lib/api';
 import { Plus, Pencil, Trash2, Shield, User, GripVertical } from 'lucide-react';
 import type { Database } from '../../lib/database.types';
 
@@ -46,9 +46,9 @@ export function EmployeeManagement() {
   const loadData = async () => {
     try {
       const [employeesRes, regionsRes, statesRes] = await Promise.all([
-        supabase.from('profiles').select('*').order('region_id').order('sort_order'),
-        supabase.from('regions').select('*').order('sort_order'),
-        supabase.from('federal_states').select('*').order('sort_order'),
+        api.get<Profile[]>('/profiles/'),
+        api.get<Region[]>('/regions/'),
+        api.get<FederalState[]>('/federal-states/'),
       ]);
 
       if (employeesRes.error) throw employeesRes.error;
@@ -69,41 +69,24 @@ export function EmployeeManagement() {
     e.preventDefault();
     try {
       if (editingEmployee) {
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            full_name: formData.full_name,
-            role: formData.role,
-            region_id: formData.region_id || null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', editingEmployee.id);
+        // Update employee
+        const updateData: any = {
+          full_name: formData.full_name,
+          role: formData.role,
+          region_id: formData.region_id || null,
+        };
 
+        // Add password if provided
+        if (formData.new_password) {
+          updateData.password = formData.new_password;
+        }
+
+        const { error } = await api.patch(`/profiles/${editingEmployee.id}/`, updateData);
         if (error) throw error;
 
-        // Update password if provided
+        // If password was updated, show message
         if (formData.new_password) {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (!session) throw new Error('Not authenticated');
-
-          const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-user-password`;
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${session.access_token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              user_id: editingEmployee.id,
-              new_password: formData.new_password,
-            }),
-          });
-
-          const result = await response.json();
-
-          if (!result.success) {
-            throw new Error(result.error || 'Fehler beim Aktualisieren des Passworts');
-          }
+          alert('Person und Passwort erfolgreich aktualisiert!');
         }
       } else {
         // Calculate sort order
@@ -112,33 +95,19 @@ export function EmployeeManagement() {
           ? Math.max(...regionEmployees.map(e => e.sort_order || 0))
           : 0;
 
-        // Call edge function to create user
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) throw new Error('Not authenticated');
-
-        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`;
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: formData.email,
-            full_name: formData.full_name,
-            role: formData.role,
-            region_id: formData.region_id || null,
-            sort_order: maxSortOrder + 1,
-          }),
+        // Create user via Django API
+        const { data, error } = await api.post<{ user: Profile; temp_password: string }>('/admin/create-user/', {
+          email: formData.email,
+          full_name: formData.full_name,
+          role: formData.role,
+          region_id: formData.region_id || null,
+          sort_order: maxSortOrder + 1,
         });
 
-        const result = await response.json();
+        if (error) throw new Error(error.message);
+        if (!data) throw new Error('Fehler beim Erstellen der Person');
 
-        if (!result.success) {
-          throw new Error(result.error || 'Fehler beim Erstellen der Person');
-        }
-
-        alert(`Person erstellt!\n\nE-Mail: ${formData.email}\nTemporäres Passwort: ${result.temporaryPassword}\n\nBitte notieren Sie das Passwort und geben Sie es der Person weiter.`);
+        alert(`Person erstellt!\n\nE-Mail: ${formData.email}\nTemporäres Passwort: ${data.temp_password}\n\nBitte notieren Sie das Passwort und geben Sie es der Person weiter.`);
       }
 
       setFormData({ email: '', full_name: '', role: 'employee', region_id: '', new_password: '' });
@@ -166,7 +135,7 @@ export function EmployeeManagement() {
     if (!confirm('Möchten Sie diese Person wirklich löschen?')) return;
 
     try {
-      const { error } = await supabase.from('profiles').delete().eq('id', id);
+      const { error } = await api.delete(`/profiles/${id}/`);
       if (error) throw error;
       loadData();
     } catch (error) {
@@ -218,12 +187,11 @@ export function EmployeeManagement() {
     try {
       const regionEmployees = employees.filter(e => e.region_id === draggedEmployee.region_id);
 
+      // Update sort order for all employees in the region
       for (let i = 0; i < regionEmployees.length; i++) {
-        const { error } = await supabase
-          .from('profiles')
-          .update({ sort_order: i + 1 })
-          .eq('id', regionEmployees[i].id);
-
+        const { error } = await api.patch(`/profiles/${regionEmployees[i].id}/`, {
+          sort_order: i + 1
+        });
         if (error) throw error;
       }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { api } from '../../lib/api';
 import { ChevronLeft, ChevronRight, Calendar, X, Pencil, Trash2, AlertTriangle, Plus, FileText } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Database } from '../../lib/database.types';
@@ -104,10 +104,10 @@ export function WeeklyOverviewReadOnly() {
       }
 
       const [employeesRes, regionsRes, federalStatesRes, absencesRes] = await Promise.all([
-        supabase.from('profiles').select('*').order('region_id').order('sort_order'),
-        supabase.from('regions').select('*').order('sort_order'),
-        supabase.from('federal_states').select('id, sort_order').order('sort_order'),
-        supabase.from('absences').select('*'),
+        api.get('/profiles/').order('region_id').order('sort_order'),
+        api.get('/regions/').order('sort_order'),
+        api.get('/federal-states/').order('sort_order'),
+        api.get('/absences/'),
       ]);
 
       if (employeesRes.error) throw employeesRes.error;

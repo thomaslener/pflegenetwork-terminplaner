@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { api } from '../../lib/api';
 import { Plus, Pencil, Trash2, GripVertical, ChevronDown, ChevronRight } from 'lucide-react';
 import type { Database } from '../../lib/database.types';
 
