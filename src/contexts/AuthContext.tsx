@@ -1,9 +1,23 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import type { User } from '@supabase/supabase-js';
-import type { Database } from '../lib/database.types';
+import { auth, api } from '../lib/api';
 
-type Profile = Database['public']['Tables']['profiles']['Row'];
+interface User {
+  id: string;
+  email: string;
+}
+
+interface Profile {
+  id: string;
+  email: string;
+  full_name: string;
+  role: 'admin' | 'employee';
+  region: string | null;
+  region_name?: string;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -20,40 +34,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadProfile(session.user.id);
+    // Check initial session
+    auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setUser({ id: session.user.id, email: session.user.email });
+        loadProfile();
       } else {
         setLoading(false);
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      (async () => {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await loadProfile(session.user.id);
-        } else {
-          setProfile(null);
-          setLoading(false);
-        }
-      })();
-    });
+    // Setup periodic token refresh (every 50 minutes)
+    const refreshInterval = setInterval(async () => {
+      const { error } = await auth.refreshToken();
+      if (error) {
+        // Token refresh failed, log out user
+        signOut();
+      }
+    }, 50 * 60 * 1000);
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearInterval(refreshInterval);
+    };
   }, []);
 
-  const loadProfile = async (userId: string) => {
+  const loadProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
+      const { data, error } = await api.get<Profile>('/auth/me/');
 
       if (error) throw error;
-      setProfile(data);
+      if (data) {
+        setProfile(data);
+        setUser({ id: data.id, email: data.email });
+      }
     } catch (error) {
       console.error('Error loading profile:', error);
     } finally {
@@ -62,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await auth.signOut();
     setUser(null);
     setProfile(null);
   };

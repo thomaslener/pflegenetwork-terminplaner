@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '../../lib/supabase';
+import { api } from '../../lib/api';
 import { Users, Upload, AlertTriangle, X, CheckCircle2 } from 'lucide-react';
 
 interface Client {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { api } from '../../lib/api';
 import type { Database } from '../../lib/database.types';
 import { ClientAutocomplete } from '../shared/ClientAutocomplete';
 
