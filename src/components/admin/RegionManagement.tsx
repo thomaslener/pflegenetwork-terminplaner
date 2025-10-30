@@ -36,9 +36,9 @@ export function RegionManagement() {
   const loadData = async () => {
     try {
       const { data: statesData, error: statesError } = await supabase
-        .from('federal_states')
+        .from('regions')
         .select('*')
-        .order('sort_order');
+        .order('name');
 
       if (statesError) throw statesError;
       setFederalStates(statesData || []);

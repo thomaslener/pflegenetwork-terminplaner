@@ -91,58 +91,28 @@ export function WeeklyOverviewReadOnly() {
   const loadWeeklyData = async () => {
     setLoading(true);
     try {
-      // Get the user's region to determine their federal state
-      let currentUserFederalStateId: string | null = null;
-      if (profile?.region_id) {
-        const { data: userRegion } = await supabase
-          .from('regions')
-          .select('federal_state_id')
-          .eq('id', profile.region_id)
-          .maybeSingle();
-        currentUserFederalStateId = userRegion?.federal_state_id || null;
-        setUserFederalStateId(currentUserFederalStateId);
-      }
+      // Get the user's federal state (region_id points to federal state)
+      const currentUserFederalStateId = profile?.region_id || null;
+      setUserFederalStateId(currentUserFederalStateId);
 
-      const [employeesRes, regionsRes, federalStatesRes, absencesRes] = await Promise.all([
-        supabase.from('profiles').select('*').order('region_id').order('sort_order'),
-        supabase.from('regions').select('*').order('sort_order'),
-        supabase.from('federal_states').select('id, sort_order').order('sort_order'),
+      const [employeesRes, federalStatesRes, absencesRes] = await Promise.all([
+        supabase.from('profiles').select('*').order('region_id'),
+        supabase.from('regions').select('*').order('name'),
         supabase.from('absences').select('*'),
       ]);
 
       if (employeesRes.error) throw employeesRes.error;
-      if (regionsRes.error) throw regionsRes.error;
       if (federalStatesRes.error) throw federalStatesRes.error;
       if (absencesRes.error) throw absencesRes.error;
 
       let employees = employeesRes.data || [];
-      let regions = (regionsRes.data || []) as RegionExtended[];
-      const federalStates = federalStatesRes.data || [];
+      const federalStates = (federalStatesRes.data || []);
       const absences = absencesRes.data || [];
 
-      // Add federal state sort order to regions
-      const stateOrderMap = new Map(federalStates.map(fs => [fs.id, fs.sort_order]));
-      regions = regions.map(r => ({
-        ...r,
-        federal_state_sort_order: r.federal_state_id ? stateOrderMap.get(r.federal_state_id) : null
-      }));
-
-      // Filter regions and employees to only show those in the user's federal state
+      // Filter employees to only show those in the user's federal state
       if (currentUserFederalStateId) {
-        regions = regions.filter(r => r.federal_state_id === currentUserFederalStateId);
-        const regionIds = new Set(regions.map(r => r.id));
-        employees = employees.filter(e => e.region_id && regionIds.has(e.region_id));
+        employees = employees.filter(e => e.region_id === currentUserFederalStateId);
       }
-
-      // Sort regions by federal state order, then by region order
-      regions.sort((a, b) => {
-        const stateOrderA = a.federal_state_sort_order ?? 999999;
-        const stateOrderB = b.federal_state_sort_order ?? 999999;
-        if (stateOrderA !== stateOrderB) {
-          return stateOrderA - stateOrderB;
-        }
-        return (a.sort_order ?? 999999) - (b.sort_order ?? 999999);
-      });
 
       const weekEnd = new Date(currentWeekStart.getFullYear(), currentWeekStart.getMonth(), currentWeekStart.getDate() + 6);
 
@@ -170,8 +140,8 @@ export function WeeklyOverviewReadOnly() {
 
       if (shiftsError) throw shiftsError;
 
-      // Get open shifts for regions in this federal state
-      const regionIds = regions.map(r => r.id);
+      // Get open shifts for this federal state
+      const regionIds = currentUserFederalStateId ? [currentUserFederalStateId] : [];
       const { data: openShifts, error: openShiftsError } = await supabase
         .from('shifts')
         .select('*')

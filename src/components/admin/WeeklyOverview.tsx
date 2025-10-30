@@ -6,17 +6,13 @@ import { ClientAutocomplete } from '../shared/ClientAutocomplete';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type Shift = Database['public']['Tables']['shifts']['Row'];
-type Region = Database['public']['Tables']['regions']['Row'];
-
-interface RegionExtended extends Region {
-  federal_state_id: string | null;
-  federal_state_sort_order?: number | null;
-}
 
 interface FederalState {
   id: string;
   name: string;
-  sort_order: number | null;
+  description: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 interface Absence {
@@ -35,15 +31,10 @@ interface EmployeeShifts {
   absences: Absence[];
 }
 
-interface RegionGroup {
-  region: RegionExtended | null;
-  employeeShifts: EmployeeShifts[];
-  openShifts: Shift[];
-}
-
 interface FederalStateGroup {
   federalState: FederalState | null;
-  regionGroups: RegionGroup[];
+  employeeShifts: EmployeeShifts[];
+  openShifts: Shift[];
 }
 
 // Color palette for regions
@@ -101,39 +92,22 @@ export function WeeklyOverview() {
   const loadWeeklyData = async () => {
     setLoading(true);
     try {
-      const [employeesRes, regionsRes, federalStatesRes, absencesRes] = await Promise.all([
-        supabase.from('profiles').select('*').order('region_id').order('sort_order'),
-        supabase.from('regions').select('*').order('sort_order'),
-        supabase.from('federal_states').select('*').order('sort_order'),
+      const [employeesRes, federalStatesRes, absencesRes] = await Promise.all([
+        supabase.from('profiles').select('*').order('region_id'),
+        supabase.from('regions').select('*').order('name'),
         supabase.from('absences').select('*'),
       ]);
 
       if (employeesRes.error) throw employeesRes.error;
-      if (regionsRes.error) throw regionsRes.error;
       if (federalStatesRes.error) throw federalStatesRes.error;
       if (absencesRes.error) throw absencesRes.error;
 
       const employees = employeesRes.data || [];
-      let regions = (regionsRes.data || []) as RegionExtended[];
       const federalStates = (federalStatesRes.data || []) as FederalState[];
       const absences = absencesRes.data || [];
 
-      // Add federal state sort order to regions
-      const stateOrderMap = new Map(federalStates.map(fs => [fs.id, fs.sort_order]));
-      regions = regions.map(r => ({
-        ...r,
-        federal_state_sort_order: r.federal_state_id ? stateOrderMap.get(r.federal_state_id) : null
-      }));
-
-      // Sort regions by federal state order, then by region order
-      regions.sort((a, b) => {
-        const stateOrderA = a.federal_state_sort_order ?? 999999;
-        const stateOrderB = b.federal_state_sort_order ?? 999999;
-        if (stateOrderA !== stateOrderB) {
-          return stateOrderA - stateOrderB;
-        }
-        return (a.sort_order ?? 999999) - (b.sort_order ?? 999999);
-      });
+      // Sort federal states alphabetically
+      federalStates.sort((a, b) => a.name.localeCompare(b.name));
 
       setAllAbsences(absences);
 
@@ -180,21 +154,21 @@ export function WeeklyOverview() {
         absences: absences.filter(absence => absence.employee_id === employee.id),
       }));
 
-      const groupedByRegion: RegionGroup[] = [];
+      const groupedByFederalState: FederalStateGroup[] = [];
 
-      // Group by region in the sorted order
-      regions.forEach(region => {
-        const regionEmployees = employeeShiftsData.filter(
-          es => es.employee.region_id === region.id
+      // Group by federal state
+      federalStates.forEach(state => {
+        const stateEmployees = employeeShiftsData.filter(
+          es => es.employee.region_id === state.id
         );
-        const regionOpenShifts = (openShifts || []).filter(
-          s => s.region_id === region.id
+        const stateOpenShifts = (openShifts || []).filter(
+          s => s.region_id === state.id
         );
-        if (regionEmployees.length > 0 || regionOpenShifts.length > 0) {
-          groupedByRegion.push({
-            region,
-            employeeShifts: regionEmployees,
-            openShifts: regionOpenShifts,
+        if (stateEmployees.length > 0 || stateOpenShifts.length > 0) {
+          groupedByFederalState.push({
+            federalState: state,
+            employeeShifts: stateEmployees,
+            openShifts: stateOpenShifts,
           });
         }
       });
@@ -203,36 +177,10 @@ export function WeeklyOverview() {
         es => !es.employee.region_id
       );
       if (noRegionEmployees.length > 0) {
-        groupedByRegion.push({
-          region: null,
-          employeeShifts: noRegionEmployees,
-          openShifts: [],
-        });
-      }
-
-      // Group regions by federal state
-      const groupedByFederalState: FederalStateGroup[] = [];
-
-      federalStates.forEach(state => {
-        const stateRegions = groupedByRegion.filter(
-          rg => rg.region?.federal_state_id === state.id
-        );
-        if (stateRegions.length > 0) {
-          groupedByFederalState.push({
-            federalState: state,
-            regionGroups: stateRegions,
-          });
-        }
-      });
-
-      // Add regions without federal state
-      const noStateRegions = groupedByRegion.filter(
-        rg => !rg.region || !rg.region.federal_state_id
-      );
-      if (noStateRegions.length > 0) {
         groupedByFederalState.push({
           federalState: null,
-          regionGroups: noStateRegions,
+          employeeShifts: noRegionEmployees,
+          openShifts: [],
         });
       }
 
