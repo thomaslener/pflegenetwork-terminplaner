@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { auth } from '../lib/api';
+import { supabase } from '../lib/supabase';
 import { Mail } from 'lucide-react';
 
 export function LoginPage() {
@@ -14,14 +14,11 @@ export function LoginPage() {
     setLoading(true);
 
     try {
-      const { error } = await auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (error) throw error;
-
-      // Reload the page to trigger auth state update
-      window.location.reload();
     } catch (error: any) {
       setError(error.message || 'Fehler beim Anmelden');
     } finally {
