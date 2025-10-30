@@ -3,26 +3,15 @@ import { supabase } from '../../lib/supabase';
 import { Plus, Pencil, Trash2, GripVertical, ChevronDown, ChevronRight } from 'lucide-react';
 import type { Database } from '../../lib/database.types';
 
-type Region = Database['public']['Tables']['regions']['Row'];
-
-interface FederalState {
-  id: string;
-  name: string;
-  sort_order: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-}
-
-interface RegionWithState extends Region {
-  federal_state_id: string | null;
-}
+type FederalState = Database['public']['Tables']['regions']['Row'];
+type District = Database['public']['Tables']['districts']['Row'];
 
 export function RegionManagement() {
   const [federalStates, setFederalStates] = useState<FederalState[]>([]);
-  const [regions, setRegions] = useState<RegionWithState[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editingRegion, setEditingRegion] = useState<RegionWithState | null>(null);
+  const [editingDistrict, setEditingDistrict] = useState<District | null>(null);
   const [selectedFederalStateId, setSelectedFederalStateId] = useState<string>('');
   const [formData, setFormData] = useState({ name: '', description: '', federal_state_id: '' });
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -36,20 +25,20 @@ export function RegionManagement() {
   const loadData = async () => {
     try {
       const { data: statesData, error: statesError } = await supabase
-        .from('federal_states')
+        .from('regions')
         .select('*')
         .order('sort_order');
 
       if (statesError) throw statesError;
       setFederalStates(statesData || []);
 
-      const { data: regionsData, error: regionsError } = await supabase
-        .from('regions')
+      const { data: districtsData, error: districtsError } = await supabase
+        .from('districts')
         .select('*')
         .order('sort_order');
 
-      if (regionsError) throw regionsError;
-      setRegions(regionsData || []);
+      if (districtsError) throw districtsError;
+      setDistricts(districtsData || []);
 
       if (statesData && statesData.length > 0) {
         const allStateIds = new Set(statesData.map(s => s.id));
@@ -72,37 +61,37 @@ export function RegionManagement() {
     setExpandedStates(newExpanded);
   };
 
-  const getRegionsForState = (stateId: string) => {
-    return regions.filter(r => r.federal_state_id === stateId);
+  const getDistrictsForState = (stateId: string) => {
+    return districts.filter(d => d.federal_state_id === stateId);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (editingRegion) {
+      if (editingDistrict) {
         const { error } = await supabase
-          .from('regions')
+          .from('districts')
           .update({
             name: formData.name,
             description: formData.description,
-            federal_state_id: formData.federal_state_id || null,
+            federal_state_id: formData.federal_state_id,
             updated_at: new Date().toISOString()
           })
-          .eq('id', editingRegion.id);
+          .eq('id', editingDistrict.id);
 
         if (error) throw error;
       } else {
-        const stateRegions = regions.filter(r => r.federal_state_id === formData.federal_state_id);
-        const maxSortOrder = stateRegions.length > 0
-          ? Math.max(...stateRegions.map(r => r.sort_order || 0))
+        const stateDistricts = districts.filter(d => d.federal_state_id === formData.federal_state_id);
+        const maxSortOrder = stateDistricts.length > 0
+          ? Math.max(...stateDistricts.map(d => d.sort_order || 0))
           : 0;
 
         const { error } = await supabase
-          .from('regions')
+          .from('districts')
           .insert([{
             name: formData.name,
             description: formData.description,
-            federal_state_id: formData.federal_state_id || null,
+            federal_state_id: formData.federal_state_id,
             sort_order: maxSortOrder + 1
           }]);
 
@@ -111,19 +100,19 @@ export function RegionManagement() {
 
       setFormData({ name: '', description: '', federal_state_id: '' });
       setShowForm(false);
-      setEditingRegion(null);
+      setEditingDistrict(null);
       loadData();
     } catch (error) {
-      console.error('Error saving region:', error);
+      console.error('Error saving district:', error);
     }
   };
 
-  const handleEdit = (region: RegionWithState) => {
-    setEditingRegion(region);
+  const handleEdit = (district: District) => {
+    setEditingDistrict(district);
     setFormData({
-      name: region.name,
-      description: region.description || '',
-      federal_state_id: region.federal_state_id || ''
+      name: district.name,
+      description: district.description || '',
+      federal_state_id: district.federal_state_id
     });
     setShowForm(true);
   };
@@ -133,20 +122,20 @@ export function RegionManagement() {
 
     try {
       const { error } = await supabase
-        .from('regions')
+        .from('districts')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
       loadData();
     } catch (error) {
-      console.error('Error deleting region:', error);
+      console.error('Error deleting district:', error);
     }
   };
 
   const handleCancel = () => {
     setShowForm(false);
-    setEditingRegion(null);
+    setEditingDistrict(null);
     setFormData({ name: '', description: '', federal_state_id: '' });
   };
 
@@ -160,15 +149,15 @@ export function RegionManagement() {
 
     if (draggedIndex === null || draggedIndex === index || selectedFederalStateId !== stateId) return;
 
-    const stateRegions = getRegionsForState(stateId);
-    const newStateRegions = [...stateRegions];
-    const draggedRegion = newStateRegions[draggedIndex];
+    const stateDistricts = getDistrictsForState(stateId);
+    const newStateDistricts = [...stateDistricts];
+    const draggedDistrict = newStateDistricts[draggedIndex];
 
-    newStateRegions.splice(draggedIndex, 1);
-    newStateRegions.splice(index, 0, draggedRegion);
+    newStateDistricts.splice(draggedIndex, 1);
+    newStateDistricts.splice(index, 0, draggedDistrict);
 
-    const otherRegions = regions.filter(r => r.federal_state_id !== stateId);
-    setRegions([...otherRegions, ...newStateRegions]);
+    const otherDistricts = districts.filter(d => d.federal_state_id !== stateId);
+    setDistricts([...otherDistricts, ...newStateDistricts]);
     setDraggedIndex(index);
   };
 
@@ -176,15 +165,15 @@ export function RegionManagement() {
     if (draggedIndex === null || !selectedFederalStateId) return;
 
     try {
-      const stateRegions = getRegionsForState(selectedFederalStateId);
-      const updates = stateRegions.map((region, index) => ({
-        id: region.id,
+      const stateDistricts = getDistrictsForState(selectedFederalStateId);
+      const updates = stateDistricts.map((district, index) => ({
+        id: district.id,
         sort_order: index + 1
       }));
 
       for (const update of updates) {
         const { error } = await supabase
-          .from('regions')
+          .from('districts')
           .update({ sort_order: update.sort_order })
           .eq('id', update.id);
 
@@ -229,7 +218,7 @@ export function RegionManagement() {
 
       for (const update of updates) {
         const { error } = await supabase
-          .from('federal_states')
+          .from('regions')
           .update({ sort_order: update.sort_order, updated_at: new Date().toISOString() })
           .eq('id', update.id);
 
@@ -271,7 +260,7 @@ export function RegionManagement() {
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-slate-50 p-6 rounded-lg border border-slate-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {editingRegion ? 'Region bearbeiten' : 'Neue Region'}
+            {editingDistrict ? 'Region bearbeiten' : 'Neue Region'}
           </h3>
           <div className="space-y-4">
             <div>
@@ -318,7 +307,7 @@ export function RegionManagement() {
                 type="submit"
                 className="bg-primary-600 hover:bg-primary-700 text-[#2e2e2e] font-bold px-4 py-2 rounded-lg transition-colors"
               >
-                {editingRegion ? 'Aktualisieren' : 'Erstellen'}
+                {editingDistrict ? 'Aktualisieren' : 'Erstellen'}
               </button>
               <button
                 type="button"
@@ -334,7 +323,7 @@ export function RegionManagement() {
 
       <div className="space-y-3">
         {federalStates.map((state, stateIndex) => {
-          const stateRegions = getRegionsForState(state.id);
+          const stateDistricts = getDistrictsForState(state.id);
           const isExpanded = expandedStates.has(state.id);
 
           return (
@@ -361,21 +350,21 @@ export function RegionManagement() {
                   )}
                   <div className="flex-1 text-left">
                     <h3 className="font-bold text-gray-900 text-lg">{state.name}</h3>
-                    <p className="text-sm text-gray-500">{stateRegions.length} {stateRegions.length === 1 ? 'Region' : 'Regionen'}</p>
+                    <p className="text-sm text-gray-500">{stateDistricts.length} {stateDistricts.length === 1 ? 'Region' : 'Regionen'}</p>
                   </div>
                 </button>
               </div>
 
               {isExpanded && (
                 <div className="border-t border-slate-200 p-4 bg-slate-50 space-y-2">
-                  {stateRegions.length === 0 ? (
+                  {stateDistricts.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
                       Keine Regionen in diesem Bundesland. Fügen Sie eine neue Region hinzu.
                     </div>
                   ) : (
-                    stateRegions.map((region, index) => (
+                    stateDistricts.map((district, index) => (
                       <div
-                        key={region.id}
+                        key={district.id}
                         draggable
                         onDragStart={() => handleDragStart(index, state.id)}
                         onDragOver={(e) => handleDragOver(e, index, state.id)}
@@ -387,21 +376,21 @@ export function RegionManagement() {
                         <div className="flex items-center gap-3">
                           <GripVertical className="w-5 h-5 text-gray-400 flex-shrink-0" />
                           <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900">{region.name}</h4>
-                            {region.description && (
-                              <p className="text-sm text-gray-600 mt-1">{region.description}</p>
+                            <h4 className="font-semibold text-gray-900">{district.name}</h4>
+                            {district.description && (
+                              <p className="text-sm text-gray-600 mt-1">{district.description}</p>
                             )}
                           </div>
                           <div className="flex gap-1 flex-shrink-0">
                             <button
-                              onClick={() => handleEdit(region)}
+                              onClick={() => handleEdit(district)}
                               className="p-1.5 text-primary-600 hover:bg-primary-50 rounded transition-colors"
                               title="Bearbeiten"
                             >
                               <Pencil className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleDelete(region.id)}
+                              onClick={() => handleDelete(district.id)}
                               className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
                               title="Löschen"
                             >
