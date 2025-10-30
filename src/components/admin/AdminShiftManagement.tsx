@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../lib/api';
+import { supabase } from '../../lib/supabase';
 import { Plus, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Copy, Pencil, Trash2, AlertTriangle } from 'lucide-react';
 import type { Database } from '../../lib/database.types';
 import { ShiftForm } from '../shifts/ShiftForm';

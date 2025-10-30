@@ -1,20 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import type { User } from '@supabase/supabase-js';
+import type { Database } from '../lib/database.types';
 
-interface User {
-  id: string;
-  email: string;
-}
-
-interface Profile {
-  id: string;
-  email: string;
-  full_name: string;
-  role: 'admin' | 'employee';
-  region_id: string | null;
-  created_at: string;
-  updated_at: string;
-}
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface AuthContextType {
   user: User | null;
@@ -32,8 +21,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setUser({ id: session.user.id, email: session.user.email || '' });
+      setUser(session?.user ?? null);
+      if (session?.user) {
         loadProfile(session.user.id);
       } else {
         setLoading(false);
@@ -41,19 +30,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        setUser({ id: session.user.id, email: session.user.email || '' });
-        loadProfile(session.user.id);
-      } else {
-        setUser(null);
-        setProfile(null);
-        setLoading(false);
-      }
+      (async () => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          await loadProfile(session.user.id);
+        } else {
+          setProfile(null);
+          setLoading(false);
+        }
+      })();
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const loadProfile = async (userId: string) => {
@@ -65,9 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
 
       if (error) throw error;
-      if (data) {
-        setProfile(data);
-      }
+      setProfile(data);
     } catch (error) {
       console.error('Error loading profile:', error);
     } finally {

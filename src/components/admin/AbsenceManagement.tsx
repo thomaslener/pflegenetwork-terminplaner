@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../lib/api';
+import { supabase } from '../../lib/supabase';
 import { Calendar, Plus, X, Pencil, Trash2, AlertTriangle } from 'lucide-react';
 
 interface Absence {

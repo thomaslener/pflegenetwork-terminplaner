@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { api } from '../../lib/api';
+import { supabase } from '../../lib/supabase';
 import { Search, X } from 'lucide-react';
 
 interface Client {

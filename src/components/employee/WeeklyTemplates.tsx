@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../lib/api';
+import { supabase } from '../../lib/supabase';
 import { Plus, Copy, Pencil, Trash2, Calendar } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Database } from '../../lib/database.types';
