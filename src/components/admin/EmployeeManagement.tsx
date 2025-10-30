@@ -5,16 +5,27 @@ import type { Database } from '../../lib/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
+interface Region {
+  id: string;
+  name: string;
+  federal_state_id: string | null;
+  description: string | null;
+  sort_order: number | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
 interface FederalState {
   id: string;
   name: string;
-  description: string | null;
+  sort_order: number | null;
   created_at: string | null;
   updated_at: string | null;
 }
 
 export function EmployeeManagement() {
   const [employees, setEmployees] = useState<Profile[]>([]);
+  const [regions, setRegions] = useState<Region[]>([]);
   const [federalStates, setFederalStates] = useState<FederalState[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -34,15 +45,18 @@ export function EmployeeManagement() {
 
   const loadData = async () => {
     try {
-      const [employeesRes, statesRes] = await Promise.all([
-        supabase.from('profiles').select('*').order('region_id'),
-        supabase.from('regions').select('*').order('name'),
+      const [employeesRes, regionsRes, statesRes] = await Promise.all([
+        supabase.from('profiles').select('*').order('region_id').order('sort_order'),
+        supabase.from('regions').select('*').order('sort_order'),
+        supabase.from('federal_states').select('*').order('sort_order'),
       ]);
 
       if (employeesRes.error) throw employeesRes.error;
+      if (regionsRes.error) throw regionsRes.error;
       if (statesRes.error) throw statesRes.error;
 
       setEmployees(employeesRes.data || []);
+      setRegions(regionsRes.data || []);
       setFederalStates(statesRes.data || []);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -221,15 +235,15 @@ export function EmployeeManagement() {
     }
   };
 
-  const getFederalStateName = (regionId: string | null) => {
+  const getRegionName = (regionId: string | null) => {
     if (!regionId) return null;
-    return federalStates.find((r) => r.id === regionId)?.name || null;
+    return regions.find((r) => r.id === regionId)?.name || null;
   };
 
   const groupEmployeesByRegion = () => {
-    const grouped: { region: FederalState | null; employees: Profile[] }[] = [];
+    const grouped: { region: Region | null; employees: Profile[] }[] = [];
 
-    federalStates.forEach(region => {
+    regions.forEach(region => {
       const regionEmployees = employees.filter(e => e.region_id === region.id);
       if (regionEmployees.length > 0) {
         grouped.push({ region, employees: regionEmployees });
