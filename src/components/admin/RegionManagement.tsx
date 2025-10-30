@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Plus, Pencil, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
 import type { Database } from '../../lib/database.types';
 
 type FederalState = Database['public']['Tables']['regions']['Row'];
@@ -26,6 +26,9 @@ export function RegionManagement() {
   const [federalStateFormData, setFederalStateFormData] = useState({ name: '', description: '' });
   const [districtFormData, setDistrictFormData] = useState({ name: '', description: '', federal_state_id: '' });
   const [expandedStates, setExpandedStates] = useState<Set<string>>(new Set());
+  const [draggedStateIndex, setDraggedStateIndex] = useState<number | null>(null);
+  const [draggedDistrictIndex, setDraggedDistrictIndex] = useState<number | null>(null);
+  const [draggedDistrictStateId, setDraggedDistrictStateId] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -36,7 +39,7 @@ export function RegionManagement() {
       const { data: statesData, error: statesError } = await supabase
         .from('regions')
         .select('*')
-        .order('name');
+        .order('sort_order', { nullsFirst: false });
 
       if (statesError) throw statesError;
       setFederalStates(statesData || []);
@@ -213,6 +216,97 @@ export function RegionManagement() {
     setDistrictFormData({ name: '', description: '', federal_state_id: '' });
   };
 
+  const handleStateDragStart = (index: number) => {
+    setDraggedStateIndex(index);
+  };
+
+  const handleStateDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedStateIndex === null || draggedStateIndex === index) return;
+
+    const newStates = [...federalStates];
+    const draggedItem = newStates[draggedStateIndex];
+    newStates.splice(draggedStateIndex, 1);
+    newStates.splice(index, 0, draggedItem);
+
+    setFederalStates(newStates);
+    setDraggedStateIndex(index);
+  };
+
+  const handleStateDragEnd = async () => {
+    if (draggedStateIndex === null) return;
+
+    try {
+      const updates = federalStates.map((state, index) => ({
+        id: state.id,
+        sort_order: index + 1
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('regions')
+          .update({ sort_order: update.sort_order })
+          .eq('id', update.id);
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Error updating federal state sort order:', error);
+      loadData();
+    } finally {
+      setDraggedStateIndex(null);
+    }
+  };
+
+  const handleDistrictDragStart = (index: number, stateId: string) => {
+    setDraggedDistrictIndex(index);
+    setDraggedDistrictStateId(stateId);
+  };
+
+  const handleDistrictDragOver = (e: React.DragEvent, index: number, stateId: string) => {
+    e.preventDefault();
+    if (draggedDistrictIndex === null || draggedDistrictStateId !== stateId) return;
+
+    const stateDistricts = getDistrictsForState(stateId);
+    if (draggedDistrictIndex === index) return;
+
+    const newDistricts = [...stateDistricts];
+    const draggedItem = newDistricts[draggedDistrictIndex];
+    newDistricts.splice(draggedDistrictIndex, 1);
+    newDistricts.splice(index, 0, draggedItem);
+
+    const otherDistricts = districts.filter(d => d.federal_state_id !== stateId);
+    setDistricts([...otherDistricts, ...newDistricts]);
+    setDraggedDistrictIndex(index);
+  };
+
+  const handleDistrictDragEnd = async () => {
+    if (draggedDistrictIndex === null || !draggedDistrictStateId) return;
+
+    try {
+      const stateDistricts = getDistrictsForState(draggedDistrictStateId);
+      const updates = stateDistricts.map((district, index) => ({
+        id: district.id,
+        sort_order: index + 1
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('districts')
+          .update({ sort_order: update.sort_order })
+          .eq('id', update.id);
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Error updating district sort order:', error);
+      loadData();
+    } finally {
+      setDraggedDistrictIndex(null);
+      setDraggedDistrictStateId(null);
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-8 text-gray-500">Lädt...</div>;
   }
@@ -361,16 +455,23 @@ export function RegionManagement() {
       )}
 
       <div className="space-y-3">
-        {federalStates.map((state) => {
+        {federalStates.map((state, stateIndex) => {
           const stateDistricts = getDistrictsForState(state.id);
           const isExpanded = expandedStates.has(state.id);
 
           return (
             <div
               key={state.id}
-              className="bg-white border border-slate-200 rounded-lg overflow-hidden"
+              draggable={!showFederalStateForm && !showDistrictForm}
+              onDragStart={() => handleStateDragStart(stateIndex)}
+              onDragOver={(e) => handleStateDragOver(e, stateIndex)}
+              onDragEnd={handleStateDragEnd}
+              className="bg-white border border-slate-200 rounded-lg overflow-hidden cursor-move"
             >
               <div className="flex items-center p-4 hover:bg-slate-50 transition-colors">
+                {!showFederalStateForm && !showDistrictForm && (
+                  <GripVertical className="w-5 h-5 text-gray-400 mr-2 flex-shrink-0" />
+                )}
                 <button
                   onClick={() => toggleState(state.id)}
                   className="flex items-center gap-3 flex-1"
@@ -412,12 +513,19 @@ export function RegionManagement() {
                       Keine Regionen in diesem Bundesland. Fügen Sie eine neue Region hinzu.
                     </div>
                   ) : (
-                    stateDistricts.map((district) => (
+                    stateDistricts.map((district, districtIndex) => (
                       <div
                         key={district.id}
-                        className="bg-white border border-slate-200 rounded-lg p-3 hover:shadow-md transition-all"
+                        draggable={!showFederalStateForm && !showDistrictForm}
+                        onDragStart={() => handleDistrictDragStart(districtIndex, state.id)}
+                        onDragOver={(e) => handleDistrictDragOver(e, districtIndex, state.id)}
+                        onDragEnd={handleDistrictDragEnd}
+                        className="bg-white border border-slate-200 rounded-lg p-3 hover:shadow-md transition-all cursor-move"
                       >
                         <div className="flex items-center gap-3">
+                          {!showFederalStateForm && !showDistrictForm && (
+                            <GripVertical className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                          )}
                           <div className="flex-1">
                             <h4 className="font-semibold text-gray-900">{district.name}</h4>
                             {district.description && (
