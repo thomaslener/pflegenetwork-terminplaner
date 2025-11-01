@@ -118,9 +118,6 @@ export function WeeklyOverview() {
       const federalStates = (federalStatesRes.data || []) as FederalState[];
       const absences = absencesRes.data || [];
 
-      console.log('WeeklyOverview loaded employees:', employees);
-      console.log('WeeklyOverview loaded districts:', districts);
-      console.log('WeeklyOverview loaded federalStates:', federalStates);
 
       // Add federal state sort order to districts
       const stateOrderMap = new Map(federalStates.map(fs => [fs.id, fs.sort_order]));
@@ -158,7 +155,6 @@ export function WeeklyOverview() {
       const { data: allShifts, error: shiftsError } = await supabase
         .from('shifts')
         .select('*')
-        .not('employee_id', 'is', null)
         .gte('shift_date', startDateStr)
         .lte('shift_date', endDateStr)
         .order('shift_date', { ascending: true })
@@ -166,25 +162,12 @@ export function WeeklyOverview() {
 
       if (shiftsError) throw shiftsError;
 
-      const { data: openShifts, error: openShiftsError } = await supabase
-        .from('shifts')
-        .select('*')
-        .is('employee_id', null)
-        .eq('open_shift', true)
-        .gte('shift_date', startDateStr)
-        .lte('shift_date', endDateStr)
-        .order('shift_date', { ascending: true })
-        .order('time_from', { ascending: true });
-
-      if (openShiftsError) throw openShiftsError;
-
       const employeeShiftsData: EmployeeShifts[] = employees.map(employee => ({
         employee,
         shifts: (allShifts || []).filter(shift => shift.employee_id === employee.id),
         absences: absences.filter(absence => absence.employee_id === employee.id),
       }));
 
-      console.log('employeeShiftsData:', employeeShiftsData);
 
       const groupedByDistrict: RegionGroup[] = [];
 
@@ -193,16 +176,12 @@ export function WeeklyOverview() {
         const districtEmployees = employeeShiftsData.filter(
           es => es.employee.region_id === district.id
         );
-        const districtOpenShifts = (openShifts || []).filter(
-          s => s.region_id === district.id
-        );
-        console.log(`District ${district.name}:`, { districtEmployees, districtOpenShifts });
         // Always show district if it has employees, even without shifts
-        if (districtEmployees.length > 0 || districtOpenShifts.length > 0) {
+        if (districtEmployees.length > 0) {
           groupedByDistrict.push({
             region: district,
             employeeShifts: districtEmployees,
-            openShifts: districtOpenShifts,
+            openShifts: [],
           });
         }
       });
