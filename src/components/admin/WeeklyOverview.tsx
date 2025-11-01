@@ -102,9 +102,9 @@ export function WeeklyOverview() {
     setLoading(true);
     try {
       const [employeesRes, districtsRes, federalStatesRes, absencesRes] = await Promise.all([
-        supabase.from('profiles').select('*').order('region_id').order('sort_order'),
-        supabase.from('districts').select('*').order('sort_order'),
-        supabase.from('regions').select('*').order('sort_order'),
+        supabase.from('profiles').select('*').order('region_id', { ascending: true }).order('sort_order', { ascending: true }),
+        supabase.from('districts').select('*').order('sort_order', { ascending: true }),
+        supabase.from('regions').select('*').order('sort_order', { ascending: true }),
         supabase.from('absences').select('*'),
       ]);
 
@@ -159,8 +159,8 @@ export function WeeklyOverview() {
         .not('employee_id', 'is', null)
         .gte('shift_date', startDateStr)
         .lte('shift_date', endDateStr)
-        .order('shift_date')
-        .order('time_from');
+        .order('shift_date', { ascending: true })
+        .order('time_from', { ascending: true });
 
       if (shiftsError) throw shiftsError;
 
@@ -171,8 +171,8 @@ export function WeeklyOverview() {
         .eq('open_shift', true)
         .gte('shift_date', startDateStr)
         .lte('shift_date', endDateStr)
-        .order('shift_date')
-        .order('time_from');
+        .order('shift_date', { ascending: true })
+        .order('time_from', { ascending: true });
 
       if (openShiftsError) throw openShiftsError;
 
