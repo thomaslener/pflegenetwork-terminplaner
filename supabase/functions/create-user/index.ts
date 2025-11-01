@@ -79,6 +79,9 @@ Deno.serve(async (req: Request) => {
       user_metadata: {
         full_name: full_name,
       },
+      app_metadata: {
+        role: role,
+      },
     });
 
     if (authError) {
