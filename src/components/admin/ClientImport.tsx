@@ -36,6 +36,19 @@ export default function ClientImport() {
         client.status && client.status.toLowerCase() === 'aktiv'
       );
 
+      const { error: deleteError } = await supabase
+        .from('clients')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (deleteError) {
+        setResult({
+          success: 0,
+          errors: [`Fehler beim Löschen bestehender Klienten: ${deleteError.message}`]
+        });
+        return;
+      }
+
       const errors: string[] = [];
       let successCount = 0;
 
@@ -59,11 +72,7 @@ export default function ClientImport() {
           });
 
           if (error) {
-            if (error.code === '23505') {
-              errors.push(`${client.vorname} ${client.nachname}: Bereits vorhanden`);
-            } else {
-              errors.push(`${client.vorname} ${client.nachname}: ${error.message}`);
-            }
+            errors.push(`${client.vorname} ${client.nachname}: ${error.message}`);
           } else {
             successCount++;
           }
@@ -73,6 +82,7 @@ export default function ClientImport() {
       }
 
       setResult({ success: successCount, errors });
+      window.location.reload();
     } catch (error) {
       setResult({
         success: 0,
@@ -93,9 +103,9 @@ export default function ClientImport() {
           Laden Sie eine clients.json Datei hoch, um Klienten zu importieren.
         </p>
         <ul className="text-sm text-gray-600 list-disc list-inside mb-4">
+          <li>Alle bestehenden Klienten werden gelöscht</li>
           <li>Nur Klienten mit Status "aktiv" werden importiert</li>
           <li>Sensible Daten (SVNR, Pflegestufe, etc.) werden nicht gespeichert</li>
-          <li>Bereits vorhandene Klienten werden übersprungen</li>
         </ul>
       </div>
 
