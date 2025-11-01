@@ -43,6 +43,9 @@ export function EmployeeManagement() {
       setEmployees(employeesRes.data || []);
       setDistricts(districtsRes.data || []);
       setFederalStates(statesRes.data || []);
+
+      console.log('Loaded federal states:', statesRes.data?.length);
+      console.log('Loaded districts:', districtsRes.data?.length);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
