@@ -101,32 +101,32 @@ export function WeeklyOverview() {
   const loadWeeklyData = async () => {
     setLoading(true);
     try {
-      const [employeesRes, regionsRes, federalStatesRes, absencesRes] = await Promise.all([
+      const [employeesRes, districtsRes, federalStatesRes, absencesRes] = await Promise.all([
         supabase.from('profiles').select('*').order('region_id').order('sort_order'),
+        supabase.from('districts').select('*').order('sort_order'),
         supabase.from('regions').select('*').order('sort_order'),
-        supabase.from('federal_states').select('*').order('sort_order'),
         supabase.from('absences').select('*'),
       ]);
 
       if (employeesRes.error) throw employeesRes.error;
-      if (regionsRes.error) throw regionsRes.error;
+      if (districtsRes.error) throw districtsRes.error;
       if (federalStatesRes.error) throw federalStatesRes.error;
       if (absencesRes.error) throw absencesRes.error;
 
       const employees = employeesRes.data || [];
-      let regions = (regionsRes.data || []) as RegionExtended[];
+      let districts = (districtsRes.data || []) as RegionExtended[];
       const federalStates = (federalStatesRes.data || []) as FederalState[];
       const absences = absencesRes.data || [];
 
-      // Add federal state sort order to regions
+      // Add federal state sort order to districts
       const stateOrderMap = new Map(federalStates.map(fs => [fs.id, fs.sort_order]));
-      regions = regions.map(r => ({
+      districts = districts.map(r => ({
         ...r,
         federal_state_sort_order: r.federal_state_id ? stateOrderMap.get(r.federal_state_id) : null
       }));
 
-      // Sort regions by federal state order, then by region order
-      regions.sort((a, b) => {
+      // Sort districts by federal state order, then by district order
+      districts.sort((a, b) => {
         const stateOrderA = a.federal_state_sort_order ?? 999999;
         const stateOrderB = b.federal_state_sort_order ?? 999999;
         if (stateOrderA !== stateOrderB) {
@@ -180,59 +180,59 @@ export function WeeklyOverview() {
         absences: absences.filter(absence => absence.employee_id === employee.id),
       }));
 
-      const groupedByRegion: RegionGroup[] = [];
+      const groupedByDistrict: RegionGroup[] = [];
 
-      // Group by region in the sorted order
-      regions.forEach(region => {
-        const regionEmployees = employeeShiftsData.filter(
-          es => es.employee.region_id === region.id
+      // Group by district in the sorted order
+      districts.forEach(district => {
+        const districtEmployees = employeeShiftsData.filter(
+          es => es.employee.region_id === district.id
         );
-        const regionOpenShifts = (openShifts || []).filter(
-          s => s.region_id === region.id
+        const districtOpenShifts = (openShifts || []).filter(
+          s => s.region_id === district.id
         );
-        if (regionEmployees.length > 0 || regionOpenShifts.length > 0) {
-          groupedByRegion.push({
-            region,
-            employeeShifts: regionEmployees,
-            openShifts: regionOpenShifts,
+        if (districtEmployees.length > 0 || districtOpenShifts.length > 0) {
+          groupedByDistrict.push({
+            region: district,
+            employeeShifts: districtEmployees,
+            openShifts: districtOpenShifts,
           });
         }
       });
 
-      const noRegionEmployees = employeeShiftsData.filter(
+      const noDistrictEmployees = employeeShiftsData.filter(
         es => !es.employee.region_id
       );
-      if (noRegionEmployees.length > 0) {
-        groupedByRegion.push({
+      if (noDistrictEmployees.length > 0) {
+        groupedByDistrict.push({
           region: null,
-          employeeShifts: noRegionEmployees,
+          employeeShifts: noDistrictEmployees,
           openShifts: [],
         });
       }
 
-      // Group regions by federal state
+      // Group districts by federal state
       const groupedByFederalState: FederalStateGroup[] = [];
 
       federalStates.forEach(state => {
-        const stateRegions = groupedByRegion.filter(
+        const stateDistricts = groupedByDistrict.filter(
           rg => rg.region?.federal_state_id === state.id
         );
-        if (stateRegions.length > 0) {
+        if (stateDistricts.length > 0) {
           groupedByFederalState.push({
             federalState: state,
-            regionGroups: stateRegions,
+            regionGroups: stateDistricts,
           });
         }
       });
 
-      // Add regions without federal state
-      const noStateRegions = groupedByRegion.filter(
+      // Add districts without federal state
+      const noStateDistricts = groupedByDistrict.filter(
         rg => !rg.region || !rg.region.federal_state_id
       );
-      if (noStateRegions.length > 0) {
+      if (noStateDistricts.length > 0) {
         groupedByFederalState.push({
           federalState: null,
-          regionGroups: noStateRegions,
+          regionGroups: noStateDistricts,
         });
       }
 
