@@ -5,27 +5,12 @@ import type { Database } from '../../lib/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
-interface Region {
-  id: string;
-  name: string;
-  federal_state_id: string | null;
-  description: string | null;
-  sort_order: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-}
-
-interface FederalState {
-  id: string;
-  name: string;
-  sort_order: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-}
+type FederalState = Database['public']['Tables']['regions']['Row'];
+type District = Database['public']['Tables']['districts']['Row'];
 
 export function EmployeeManagement() {
   const [employees, setEmployees] = useState<Profile[]>([]);
-  const [regions, setRegions] = useState<Region[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
   const [federalStates, setFederalStates] = useState<FederalState[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -45,18 +30,18 @@ export function EmployeeManagement() {
 
   const loadData = async () => {
     try {
-      const [employeesRes, regionsRes, statesRes] = await Promise.all([
+      const [employeesRes, districtsRes, statesRes] = await Promise.all([
         supabase.from('profiles').select('*').order('region_id').order('sort_order'),
+        supabase.from('districts').select('*').order('sort_order'),
         supabase.from('regions').select('*').order('sort_order'),
-        supabase.from('federal_states').select('*').order('sort_order'),
       ]);
 
       if (employeesRes.error) throw employeesRes.error;
-      if (regionsRes.error) throw regionsRes.error;
+      if (districtsRes.error) throw districtsRes.error;
       if (statesRes.error) throw statesRes.error;
 
       setEmployees(employeesRes.data || []);
-      setRegions(regionsRes.data || []);
+      setDistricts(districtsRes.data || []);
       setFederalStates(statesRes.data || []);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -235,24 +220,24 @@ export function EmployeeManagement() {
     }
   };
 
-  const getRegionName = (regionId: string | null) => {
-    if (!regionId) return null;
-    return regions.find((r) => r.id === regionId)?.name || null;
+  const getDistrictName = (districtId: string | null) => {
+    if (!districtId) return null;
+    return districts.find((d) => d.id === districtId)?.name || null;
   };
 
-  const groupEmployeesByRegion = () => {
-    const grouped: { region: Region | null; employees: Profile[] }[] = [];
+  const groupEmployeesByDistrict = () => {
+    const grouped: { district: District | null; employees: Profile[] }[] = [];
 
-    regions.forEach(region => {
-      const regionEmployees = employees.filter(e => e.region_id === region.id);
-      if (regionEmployees.length > 0) {
-        grouped.push({ region, employees: regionEmployees });
+    districts.forEach(district => {
+      const districtEmployees = employees.filter(e => e.region_id === district.id);
+      if (districtEmployees.length > 0) {
+        grouped.push({ district, employees: districtEmployees });
       }
     });
 
-    const noRegionEmployees = employees.filter(e => !e.region_id);
-    if (noRegionEmployees.length > 0) {
-      grouped.push({ region: null, employees: noRegionEmployees });
+    const noDistrictEmployees = employees.filter(e => !e.region_id);
+    if (noDistrictEmployees.length > 0) {
+      grouped.push({ district: null, employees: noDistrictEmployees });
     }
 
     return grouped;
@@ -262,7 +247,7 @@ export function EmployeeManagement() {
     return <div className="text-center py-8 text-gray-500">Lädt...</div>;
   }
 
-  const groupedEmployees = groupEmployeesByRegion();
+  const groupedEmployees = groupEmployeesByDistrict();
 
   return (
     <div className="space-y-6">
@@ -338,12 +323,12 @@ export function EmployeeManagement() {
               >
                 <option value="">Keine Region</option>
                 {federalStates.map((state) => {
-                  const stateRegions = regions.filter(r => r.federal_state_id === state.id);
-                  return stateRegions.length > 0 ? (
+                  const stateDistricts = districts.filter(d => d.federal_state_id === state.id);
+                  return stateDistricts.length > 0 ? (
                     <optgroup key={state.id} label={state.name}>
-                      {stateRegions.map((region) => (
-                        <option key={region.id} value={region.id}>
-                          {region.name}
+                      {stateDistricts.map((district) => (
+                        <option key={district.id} value={district.id}>
+                          {district.name}
                         </option>
                       ))}
                     </optgroup>
@@ -388,10 +373,10 @@ export function EmployeeManagement() {
       )}
 
       <div className="space-y-6">
-        {groupedEmployees.map(({ region, employees: regionEmployees }) => (
-          <div key={region?.id || 'no-region'} className="space-y-2">
+        {groupedEmployees.map(({ district, employees: regionEmployees }) => (
+          <div key={district?.id || 'no-region'} className="space-y-2">
             <h3 className="text-lg font-semibold text-gray-900 px-2">
-              {region?.name || 'Ohne Region'}
+              {district?.name || 'Ohne Region'}
             </h3>
             <div className="space-y-2">
               {regionEmployees.map((employee) => (
