@@ -118,6 +118,8 @@ export function WeeklyOverview() {
       const federalStates = (federalStatesRes.data || []) as FederalState[];
       const absences = absencesRes.data || [];
 
+      console.log('WeeklyOverview loaded:', { employees, districts, federalStates });
+
       // Add federal state sort order to districts
       const stateOrderMap = new Map(federalStates.map(fs => [fs.id, fs.sort_order]));
       districts = districts.map(r => ({
@@ -180,6 +182,8 @@ export function WeeklyOverview() {
         absences: absences.filter(absence => absence.employee_id === employee.id),
       }));
 
+      console.log('employeeShiftsData:', employeeShiftsData);
+
       const groupedByDistrict: RegionGroup[] = [];
 
       // Group by district in the sorted order
@@ -190,6 +194,8 @@ export function WeeklyOverview() {
         const districtOpenShifts = (openShifts || []).filter(
           s => s.region_id === district.id
         );
+        console.log(`District ${district.name}:`, { districtEmployees, districtOpenShifts });
+        // Always show district if it has employees, even without shifts
         if (districtEmployees.length > 0 || districtOpenShifts.length > 0) {
           groupedByDistrict.push({
             region: district,
