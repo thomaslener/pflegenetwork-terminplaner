@@ -118,7 +118,9 @@ export function WeeklyOverview() {
       const federalStates = (federalStatesRes.data || []) as FederalState[];
       const absences = absencesRes.data || [];
 
-      console.log('WeeklyOverview loaded:', { employees, districts, federalStates });
+      console.log('WeeklyOverview loaded employees:', employees);
+      console.log('WeeklyOverview loaded districts:', districts);
+      console.log('WeeklyOverview loaded federalStates:', federalStates);
 
       // Add federal state sort order to districts
       const stateOrderMap = new Map(federalStates.map(fs => [fs.id, fs.sort_order]));
