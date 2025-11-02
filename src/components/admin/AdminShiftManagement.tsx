@@ -465,6 +465,7 @@ export function AdminShiftManagement() {
                 setShowShiftForm(false);
                 setEditingShift(null);
               }}
+              employeeId={selectedEmployee}
             />
           )}
 

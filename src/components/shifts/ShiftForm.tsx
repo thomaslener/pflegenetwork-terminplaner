@@ -11,9 +11,10 @@ interface ShiftFormProps {
   onSave: (shiftData: any) => Promise<void>;
   onCancel: () => void;
   onSeekReplacement?: (shiftId: string) => Promise<void>;
+  employeeId?: string;
 }
 
-export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftFormProps) {
+export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement, employeeId }: ShiftFormProps) {
   const [formData, setFormData] = useState({
     shift_date: '',
     time_from: '',
@@ -24,12 +25,16 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
     region_id: '',
   });
   const [regions, setRegions] = useState<Region[]>([]);
+  const [employeeRegionId, setEmployeeRegionId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadRegions();
-  }, []);
+    if (employeeId) {
+      loadEmployeeRegion();
+    }
+  }, [employeeId]);
 
   useEffect(() => {
     if (shift) {
@@ -42,14 +47,37 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
         open_shift: !!shift.open_shift,
         region_id: shift.region_id || '',
       });
+    } else if (employeeRegionId && !formData.open_shift) {
+      setFormData(prev => ({ ...prev, region_id: employeeRegionId }));
     }
-  }, [shift]);
+  }, [shift, employeeRegionId]);
+
+  const loadEmployeeRegion = async () => {
+    if (!employeeId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('region_id')
+        .eq('id', employeeId)
+        .single();
+
+      if (error) throw error;
+      if (data?.region_id) {
+        setEmployeeRegionId(data.region_id);
+        setFormData(prev => ({ ...prev, region_id: data.region_id }));
+      }
+    } catch (error) {
+      console.error('Error loading employee region:', error);
+    }
+  };
 
   const loadRegions = async () => {
     try {
       const { data, error } = await supabase
         .from('regions')
         .select('*')
+        .is('district_id', null)
         .order('sort_order')
         .order('name');
 
@@ -152,30 +180,18 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Region *
-          </label>
-          <select
-            value={formData.region_id}
-            onChange={(e) => setFormData({ ...formData, region_id: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            required
-          >
-            <option value="">Region auswählen...</option>
-            {regions.map(region => (
-              <option key={region.id} value={region.id}>
-                {region.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="md:col-span-2">
           <label className="flex items-start gap-3 text-sm font-medium text-gray-700">
             <input
               type="checkbox"
               checked={formData.open_shift}
-              onChange={(e) => setFormData({ ...formData, open_shift: e.target.checked })}
+              onChange={(e) => {
+                const isOpen = e.target.checked;
+                setFormData({
+                  ...formData,
+                  open_shift: isOpen,
+                  region_id: isOpen ? '' : (employeeRegionId || '')
+                });
+              }}
               className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
             />
             <span>
@@ -186,6 +202,27 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement }: ShiftF
             </span>
           </label>
         </div>
+
+        {formData.open_shift && (
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Region *
+            </label>
+            <select
+              value={formData.region_id}
+              onChange={(e) => setFormData({ ...formData, region_id: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              required
+            >
+              <option value="">Region auswählen...</option>
+              {regions.map(region => (
+                <option key={region.id} value={region.id}>
+                  {region.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2 mt-4">
