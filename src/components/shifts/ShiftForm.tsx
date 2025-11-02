@@ -77,7 +77,6 @@ export function ShiftForm({ shift, onSave, onCancel, onSeekReplacement, employee
       const { data, error } = await supabase
         .from('regions')
         .select('*')
-        .is('district_id', null)
         .order('sort_order')
         .order('name');
 
