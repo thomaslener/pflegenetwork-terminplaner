@@ -135,17 +135,40 @@ export function AdminShiftManagement() {
         }
       }
 
+      // Get employee's federal_state_id (region) for non-open shifts
+      let finalRegionId = shiftData.region_id;
+      if (!shiftData.open_shift && selectedEmployee) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('region_id')
+          .eq('id', selectedEmployee)
+          .single();
+
+        if (profile?.region_id) {
+          // Get the federal_state_id from the district
+          const { data: district } = await supabase
+            .from('districts')
+            .select('federal_state_id')
+            .eq('id', profile.region_id)
+            .single();
+
+          if (district?.federal_state_id) {
+            finalRegionId = district.federal_state_id;
+          }
+        }
+      }
+
       if (editingShift) {
         const { error } = await supabase
           .from('shifts')
-          .update({ ...shiftData, updated_at: new Date().toISOString() })
+          .update({ ...shiftData, region_id: finalRegionId, updated_at: new Date().toISOString() })
           .eq('id', editingShift.id);
 
         if (error) throw error;
       } else {
         const insertData = shiftData.open_shift
           ? { ...shiftData, employee_id: null }
-          : { ...shiftData, employee_id: selectedEmployee };
+          : { ...shiftData, employee_id: selectedEmployee, region_id: finalRegionId };
 
         const { error } = await supabase
           .from('shifts')
