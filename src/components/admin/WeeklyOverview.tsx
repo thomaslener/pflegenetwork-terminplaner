@@ -186,16 +186,7 @@ export function WeeklyOverview() {
         }
       });
 
-      const noDistrictEmployees = employeeShiftsData.filter(
-        es => !es.employee.region_id
-      );
-      if (noDistrictEmployees.length > 0) {
-        groupedByDistrict.push({
-          region: null,
-          employeeShifts: noDistrictEmployees,
-          openShifts: [],
-        });
-      }
+      // Skip employees without region (don't show them in overview)
 
       // Group districts by federal state
       const groupedByFederalState: FederalStateGroup[] = [];
@@ -212,16 +203,7 @@ export function WeeklyOverview() {
         }
       });
 
-      // Add districts without federal state
-      const noStateDistricts = groupedByDistrict.filter(
-        rg => !rg.region || !rg.region.federal_state_id
-      );
-      if (noStateDistricts.length > 0) {
-        groupedByFederalState.push({
-          federalState: null,
-          regionGroups: noStateDistricts,
-        });
-      }
+      // Skip districts without federal state
 
       setFederalStateGroups(groupedByFederalState);
     } catch (error) {
