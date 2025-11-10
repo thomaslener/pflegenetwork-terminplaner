@@ -1,7 +1,7 @@
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginPage } from './components/LoginPage';
-import { AdminDashboard } from './components/admin/AdminDashboard';
-import { EmployeeDashboard } from './components/employee/EmployeeDashboard';
+import { MainAdminView } from './components/admin/MainAdminView';
+import { MainEmployeeView } from './components/employee/MainEmployeeView';
 
 function AppContent() {
   const { user, profile, loading } = useAuth();
@@ -22,10 +22,10 @@ function AppContent() {
   }
 
   if (profile.role === 'admin') {
-    return <AdminDashboard />;
+    return <MainAdminView />;
   }
 
-  return <EmployeeDashboard />;
+  return <MainEmployeeView />;
 }
 
 function App() {
