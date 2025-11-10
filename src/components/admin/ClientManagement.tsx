@@ -53,15 +53,15 @@ export function ClientManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="px-6 py-4 border-b border-slate-200">
         <h2 className="text-2xl font-bold text-gray-900 mb-1">Klienten verwalten</h2>
         <p className="text-sm text-gray-600">
           Übersicht aller registrierten Klienten
         </p>
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-200">
+      <div>
         <div className="p-4 border-b border-slate-200">
           <input
             type="text"

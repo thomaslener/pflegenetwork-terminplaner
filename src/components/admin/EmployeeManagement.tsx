@@ -250,8 +250,8 @@ export function EmployeeManagement() {
   const groupedEmployees = groupEmployeesByDistrict();
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Personen verwalten</h2>
           <p className="text-sm text-gray-600 mt-1">
@@ -270,7 +270,7 @@ export function EmployeeManagement() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+        <form onSubmit={handleSubmit} className="bg-slate-50 p-6 border-b border-slate-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {editingEmployee ? 'Person bearbeiten' : 'Neue Person'}
           </h3>
@@ -372,7 +372,7 @@ export function EmployeeManagement() {
         </form>
       )}
 
-      <div className="space-y-6">
+      <div className="p-6 space-y-6">
         {groupedEmployees.map(({ district, employees: regionEmployees }) => (
           <div key={district?.id || 'no-region'} className="space-y-2">
             <h3 className="text-lg font-semibold text-gray-900 px-2">
