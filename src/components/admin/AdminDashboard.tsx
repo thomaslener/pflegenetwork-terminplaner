@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Users, MapPin, Calendar, LayoutDashboard, Plane } from 'lucide-react';
+import { Users, MapPin, Calendar, LayoutDashboard, Plane, Briefcase } from 'lucide-react';
 import { EmployeeManagement } from './EmployeeManagement';
 import { RegionManagement } from './RegionManagement';
 import { AdminShiftManagement } from './AdminShiftManagement';
 import { WeeklyOverview } from './WeeklyOverview';
 import { AbsenceManagement } from './AbsenceManagement';
 
-type Tab = 'overview' | 'employees' | 'regions' | 'shifts' | 'absences';
+type Tab = 'overview' | 'employees' | 'regions' | 'shifts' | 'absences' | 'partners';
 
 export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -72,6 +72,17 @@ export function AdminDashboard() {
                 <MapPin className="w-5 h-5" />
                 Regionen
               </button>
+              <button
+                onClick={() => setActiveTab('partners')}
+                className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors border-b-2 whitespace-nowrap ${
+                  activeTab === 'partners'
+                    ? 'border-primary-600 text-primary-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-slate-50'
+                }`}
+              >
+                <Briefcase className="w-5 h-5" />
+                Partner & Mitarbeiter
+              </button>
             </nav>
           </div>
 
@@ -81,6 +92,7 @@ export function AdminDashboard() {
             {activeTab === 'regions' && <RegionManagement />}
             {activeTab === 'shifts' && <AdminShiftManagement />}
             {activeTab === 'absences' && <AbsenceManagement />}
+            {activeTab === 'partners' && <div className="text-gray-500">Partner & Mitarbeiter Verwaltung kommt bald...</div>}
           </div>
         </div>
       </div>
