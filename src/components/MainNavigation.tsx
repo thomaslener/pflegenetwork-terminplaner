@@ -14,8 +14,8 @@ const navigationItems: NavigationItem[] = [
   { id: 'klienten', label: 'Klienten', icon: Users },
   { id: 'vertragsfaelle', label: 'Vertragsfälle', icon: FileText },
   { id: 'terminplaner', label: 'Terminplaner', icon: Calendar },
-  { id: 'mein-profil', label: 'Mein Profil', icon: User },
   { id: 'terminliste', label: 'Terminliste', icon: List },
+  { id: 'mein-profil', label: 'Mein Profil', icon: User },
   { id: 'finanzen', label: 'Finanzen', icon: DollarSign },
 ];
 

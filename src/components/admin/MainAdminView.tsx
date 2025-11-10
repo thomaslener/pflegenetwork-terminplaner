@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MainNavigation } from '../MainNavigation';
 import { AdminDashboard } from './AdminDashboard';
+import { ClientManagement } from './ClientManagement';
 
 export function MainAdminView() {
   const [currentView, setCurrentView] = useState('terminplaner');
@@ -12,9 +13,10 @@ export function MainAdminView() {
       case 'klienten':
         return (
           <div className="p-6">
-            <div className="bg-white rounded-lg shadow p-8 text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Klienten</h2>
-              <p className="text-gray-600">Dieser Bereich wird bald verfügbar sein.</p>
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="p-6">
+                <ClientManagement />
+              </div>
             </div>
           </div>
         );

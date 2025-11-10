@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { Users, MapPin, Calendar, LogOut, LayoutDashboard, Plane, CircleUser as UserCircle } from 'lucide-react';
+import { Users, MapPin, Calendar, LogOut, LayoutDashboard, Plane } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { EmployeeManagement } from './EmployeeManagement';
 import { RegionManagement } from './RegionManagement';
 import { AdminShiftManagement } from './AdminShiftManagement';
 import { WeeklyOverview } from './WeeklyOverview';
 import { AbsenceManagement } from './AbsenceManagement';
-import { ClientManagement } from './ClientManagement';
 
-type Tab = 'overview' | 'employees' | 'regions' | 'shifts' | 'absences' | 'clients';
+type Tab = 'overview' | 'employees' | 'regions' | 'shifts' | 'absences';
 
 export function AdminDashboard() {
   const { profile, signOut } = useAuth();
@@ -81,17 +80,6 @@ export function AdminDashboard() {
                 Abwesenheiten
               </button>
               <button
-                onClick={() => setActiveTab('clients')}
-                className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors border-b-2 whitespace-nowrap ${
-                  activeTab === 'clients'
-                    ? 'border-primary-600 text-primary-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-slate-50'
-                }`}
-              >
-                <UserCircle className="w-5 h-5" />
-                Klienten
-              </button>
-              <button
                 onClick={() => setActiveTab('employees')}
                 className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors border-b-2 whitespace-nowrap ${
                   activeTab === 'employees'
@@ -122,7 +110,6 @@ export function AdminDashboard() {
             {activeTab === 'regions' && <RegionManagement />}
             {activeTab === 'shifts' && <AdminShiftManagement />}
             {activeTab === 'absences' && <AbsenceManagement />}
-            {activeTab === 'clients' && <ClientManagement />}
           </div>
         </div>
       </div>
