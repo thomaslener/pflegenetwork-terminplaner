@@ -37,7 +37,7 @@ export function AdminDashboard() {
                 }`}
               >
                 <Calendar className="w-5 h-5" />
-                Termine
+                Terminverwaltung
               </button>
               <button
                 onClick={() => setActiveTab('absences')}
