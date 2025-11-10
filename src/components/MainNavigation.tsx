@@ -48,7 +48,7 @@ export function MainNavigation({ currentView, onNavigate, children }: MainNaviga
           <div className="flex justify-between items-center h-16">
             {/* Logo and Brand */}
             <div className="flex items-center gap-3">
-              <img src="/pni.svg" alt="PNI Logo" className="h-10 w-10" />
+              <img src="/pni3.svg" alt="PNI Logo" className="h-10 w-10" />
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Pflege Network</h1>
                 <p className="text-xs text-gray-500">Pflegesystem</p>
