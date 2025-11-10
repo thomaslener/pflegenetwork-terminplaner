@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, FileText, Calendar, User, List, DollarSign, LogOut, Menu, X } from 'lucide-react';
+import { Users, FileText, Calendar, User, List, DollarSign, LogOut, Menu, X, Briefcase } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 type NavigationItem = {
@@ -11,12 +11,13 @@ type NavigationItem = {
 };
 
 const navigationItems: NavigationItem[] = [
+  { id: 'terminplaner', label: 'Terminplaner', icon: Calendar },
   { id: 'klienten', label: 'Klienten', icon: Users },
   { id: 'vertragsfaelle', label: 'Vertragsfälle', icon: FileText },
-  { id: 'terminplaner', label: 'Terminplaner', icon: Calendar },
-  { id: 'terminliste', label: 'Terminliste', icon: List },
-  { id: 'mein-profil', label: 'Mein Profil', icon: User },
+  { id: 'terminliste', label: 'Terminchronik', icon: List },
+  { id: 'partner-mitarbeiter', label: 'Partner & Mitarbeiter', icon: Briefcase },
   { id: 'finanzen', label: 'Finanzen', icon: DollarSign },
+  { id: 'mein-profil', label: 'Mein Profil', icon: User },
 ];
 
 interface MainNavigationProps {
